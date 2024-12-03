@@ -4,6 +4,22 @@ namespace Mahjong
 {
     public class Deck
     {
+        struct PublicDeck
+        {
+            // 같이 쯔모하는 패산
+            private Tiles[] openTiles;
+            // 도라 계산시에 필요한 타일들
+            private Tiles[] doraTiles;
+            // 리치시 계산시에 필요한 뒷도라 타일들
+            private Tiles[] uraDoraTiles;
+            // 깡 했을때 가져오는 영상패
+            private Tiles[] yungsangTiles;
+            // 현재 덱에서 몇번 인덱스의 타일을 쓰는지 기록
+            private int currentTileIndex;
+            // 현재 덱에서 몇번 인덱스 까지 도라가 나왔는지 확인
+            private int currentDoraTileIndex;
+        }
+        
         // 마작 타일 생성 후 초기화 (136개)
         public Tiles.Tile[] MakeInitDeck()
         {
@@ -106,11 +122,6 @@ namespace Mahjong
                 tiles[n] = tiles[k];
                 tiles[k] = temp;
             }
-        }
-
-        public Tiles.Tile[] TakeTiles(Tiles.Tile[] pileOfTiles, int number)
-        {
-            return null;
         }
     }
 }

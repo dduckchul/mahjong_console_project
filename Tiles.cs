@@ -21,10 +21,17 @@ namespace Mahjong
             public TileType type;
             public int tileNumber;
             public bool isDora;
+            public bool isShowing;
         }
 
-        public void PrintTile(Tile tile)
+        public static void PrintTile(Tile tile)
         {
+            if (!tile.isShowing)
+            {
+                Console.Write("🀫 ");
+                return;
+            }
+            
             if (tile.isDora)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -78,7 +85,6 @@ namespace Mahjong
                     default: Console.Write("😱"); break;
                 } 
             }
-
             if (tile.type == TileType.Wind)
             {
                 switch (tile.tileNumber)
@@ -90,7 +96,6 @@ namespace Mahjong
                     default: Console.Write("😱"); break;                    
                 }
             }
-            
             if (tile.type == TileType.Word)
             {
                 switch (tile.tileNumber)
@@ -101,6 +106,8 @@ namespace Mahjong
                     default: Console.Write("😱"); break;
                 }
             }
+
+            Console.Write(" ");
             
             if (tile.isDora)
             {
@@ -108,7 +115,7 @@ namespace Mahjong
             }  
         }
 
-        public void PrintDeck(Tile[] tiles)
+        public static void PrintDeck(Tile[] tiles)
         {
             for (int i = 0; i < tiles.Length; i++)
             {
