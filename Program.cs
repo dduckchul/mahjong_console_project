@@ -12,7 +12,9 @@ namespace Mahjong
             Console.WriteLine("🀇🀈🀉🀊🀋🀌🀍🀎🀏");
             Console.WriteLine("🀐🀑🀒🀓🀔🀕🀖🀗🀘");
             Console.WriteLine("🀙🀚🀛🀜🀝🀞🀟🀠🀡");
-            Console.WriteLine("🀫");            
+            Console.WriteLine("🀫");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("🀋");
         }
     }
 }
