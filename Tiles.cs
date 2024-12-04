@@ -10,11 +10,11 @@ namespace Mahjong
         }
         public enum Winds
         {
-            East=1,South,West,North,End
+            East,South,West,North,End
         }
         public enum Words
         {
-            Blank=1,Start,Middle,End
+            Blank,Start,Middle,End
         }
         public struct Tile
         {

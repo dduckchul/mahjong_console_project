@@ -13,17 +13,19 @@ namespace Mahjong
             // 현재 N번째 국인지 확인
             public int game;
             // 현재 N번째 장인지 저장할때
-            public int set;          
+            public int set;
+            // 현재 게임에서 플레이중인 유저를 기억하는 인덱스
+            public int turn;
         }
         public enum Winds
         {
-            East=1,South,West,North
+            East,South,West,North
         }
         
         public bool IsGameContinue(Players.Player[] players, Game currentGame)
         {
             int playerMaxScore = 0;
-            int currentGamePassed = (int)currentGame.currentWinds * currentGame.game;
+            int currentGamePassed = ((int)currentGame.currentWinds + 1) * currentGame.game;
             
             // 플레이어 점수 조건 탐색.
             // 1. 가장 점수 많은 사람 찾기
@@ -50,6 +52,26 @@ namespace Mahjong
             }
 
             return true;
+        }
+
+        // 게임마다 첫 번째 턴인 유저에게 턴을 준다.
+        public void FindFirstUser(Players.Player[] players, ref Game game)
+        {
+            
+        }
+
+        // 현재 플레이중인 유저의 인덱스를 반환한다.
+        public int FindPlayingUserInx(Players.Player[] players)
+        {
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (players[i].isPlaying == true)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Mahjong
         public const int DoraTiles = 5;
         public const int UraDoraTiles = 5;
         public const int YungsangTiles = 4;
+        public const int MahjongMaxTiles = 136;
 
         public struct PublicDeck
         {
@@ -30,7 +31,7 @@ namespace Mahjong
         // 마작 타일 생성 후 초기화 (136개)
         public Tiles.Tile[] MakeInitDeck()
         {
-            Tiles.Tile[] tiles = new Tiles.Tile[136];
+            Tiles.Tile[] tiles = new Tiles.Tile[MahjongMaxTiles];
 
             int tileMultiplyNum = 4;
             int numberToMakeType = (int)Tiles.TileType.End;
@@ -102,7 +103,11 @@ namespace Mahjong
             
             for (int i = 0; i < tilesMaxInt; i++)
             {
-                int tileNum = i + 1;
+                int tileNum = i;
+                if (Tiles.IsNumberTiles(type))
+                {
+                    tileNum = i + 1;
+                }
                 Tiles.Tile tile = new Tiles.Tile();
                 tile.type = type;
                 tile.tileNumber = tileNum;
@@ -118,7 +123,7 @@ namespace Mahjong
 
         // Fisher–Yates shuffle
         // https://stackoverflow.com/questions/108819/best-way-to-randomize-an-array-with-net
-        public void ShuffleDeck(ref Tiles.Tile[] tiles)
+        public void ShuffleDeck(Tiles.Tile[] tiles)
         {
             int n = tiles.Length;
             Random random = new Random();
@@ -192,8 +197,8 @@ namespace Mahjong
             {
                 for (int j = i + 1; j < myHands.Length-1; j++)
                 {
-                    int myTileNumber = (int)myHands[i].tileNumber;
-                    int nextTileNumber = (int)myHands[j].tileNumber;
+                    int myTileNumber = myHands[i].tileNumber;
+                    int nextTileNumber = myHands[j].tileNumber;
                     int myTilesType = (int)myHands[i].type;
                     int nextTilesType = (int)myHands[j].type;
 

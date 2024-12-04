@@ -37,9 +37,8 @@ namespace Mahjong
             // 0번에 나를 넣었음
             for (int i = 1; i < MaxPlayers; i++)
             {
-                // cpu는 남(=2) 부터 적용
-                int nextEnum = i + 1;
-                players[i].wind = (Games.Winds)Enum.Parse(typeof(Games.Winds), nextEnum.ToString());
+                // cpu는 남(=1) 부터 적용
+                players[i].wind = (Games.Winds)Enum.Parse(typeof(Games.Winds), i.ToString());
                 players[i].name = cpuName[i];
                 players[i].score = Score;
                 players[i].hands = new Tiles.Tile[MaxHandTiles];
@@ -96,7 +95,8 @@ namespace Mahjong
                         tile.isShowingFront = true;
                     }
                     
-                    if (player.hands[j].tileNumber == 0)
+                    // 비어있는거 확인하려고 숫자 비교했는데 여기서 이상해짐, Man0으로 초기화되기 때문에 예외처리
+                    if (player.hands[j].type == Tiles.TileType.Man && player.hands[j].tileNumber == 0)
                     {
                         player.hands[j] = tile;
                         break;
@@ -174,6 +174,17 @@ namespace Mahjong
         private static void PrintPlayerDiscards(Player p)
         {
             Tiles.PrintDeck(p.discards);
+        }
+        
+        // 공용 덱에서 하나 타일을 뽑는다.
+        public static Tiles.Tile Tsumo(ref Deck.PublicDeck deck)
+        {
+            if (deck.currentTileIndex < 0 || deck.currentTileIndex > Deck.MahjongMaxTiles)
+            {
+                Console.WriteLine("쯔모시 뭔가 잘못되었습니다 😱");
+            }
+            
+            return deck.publicTiles[deck.currentTileIndex++];
         }
     }
 }
