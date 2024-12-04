@@ -23,11 +23,14 @@ namespace Mahjong
             // 마작 패 셔플 잘 됐는지 출력
             // tiles.PrintDeck(pilesOfTile);
             
-            // TO-DO : 실제 작동할때는 이름 입력받도록
-            // Players.Player me = players.SetMyAvata("");
-            Players.Player me = players.SetMyAvata("😅입력하기 귀찮아");
-            Players.Player[] mahjongPlayers = players.InitPlayers(ref me);
-            
+            Players.Player[] mahjongPlayers = players.InitPlayers();
+            InitPlayersHand(ref mahjongPlayers, pilesOfTile);
+            Console.Clear();
+            Players.PrintPlayers(mahjongPlayers);
+        }
+
+        public static void InitPlayersHand(ref Players.Player[] mahjongPlayers, Tiles.Tile[] mahjongTiles)
+        {
             // 현재 분배중인 덱 인덱스
             int tileIndex = 0;
             int distributeTimes = 3;
@@ -45,7 +48,9 @@ namespace Mahjong
                     for (int j = 0; j < mahjongPlayers.Length; j++)
                     {
                         Thread.Sleep(150);
-                        players.TakeTiles(pilesOfTile, ref mahjongPlayers[j], wantToDistribute, tileIndex);
+                        Console.Clear();
+                        Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], wantToDistribute, tileIndex);
+                        Players.PrintPlayers(mahjongPlayers);
                         tileIndex += wantToDistribute;
                     }     
                 }
@@ -55,11 +60,13 @@ namespace Mahjong
                     for (int j = 0; j < mahjongPlayers.Length; j++)
                     {
                         Thread.Sleep(150);
-                        players.TakeTiles(pilesOfTile, ref mahjongPlayers[j], remainderTiles, tileIndex);
+                        Console.Clear();                        
+                        Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], remainderTiles, tileIndex);
+                        Players.PrintPlayers(mahjongPlayers);
                         tileIndex += remainderTiles;
                     }                    
                 }
-            }
+            }            
         }
     }
 }

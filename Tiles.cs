@@ -21,14 +21,21 @@ namespace Mahjong
             public TileType type;
             public int tileNumber;
             public bool isDora;
-            public bool isShowing;
+            public bool isShowingFront;
+            public bool isVisible;
         }
 
         public static void PrintTile(Tile tile)
         {
-            if (!tile.isShowing)
+            if (!tile.isVisible)
             {
-                Console.Write("🀫 ");
+                return;
+            }
+            
+            if (!tile.isShowingFront)
+            {
+                Console.Write("🀫");
+                Console.Write(" ");
                 return;
             }
             
@@ -107,12 +114,22 @@ namespace Mahjong
                 }
             }
 
-            Console.Write(" ");
+            // 중 타일 하나 띄고 나오는거 거슬려서 예외처리
+            if (!(tile.type == TileType.Word && tile.tileNumber == (int)Words.Middle))
+            {
+                Console.Write(" ");                
+            }
             
-            if (tile.isDora)
+            // 도라 색상 변경 후 리셋 버그 예외 처리
+            if (Console.BackgroundColor == ConsoleColor.DarkGreen && tile.isDora)
             {
                 Console.ResetColor();
-            }  
+                Console.BackgroundColor = ConsoleColor.DarkGreen;
+            }
+            else if (tile.isDora)
+            {
+                Console.ResetColor();                
+            }
         }
 
         public static void PrintDeck(Tile[] tiles)

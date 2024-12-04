@@ -13,7 +13,7 @@ namespace Mahjong
             // 현재 N번째 국인지 확인
             public int game;
             // 현재 N번째 장인지 저장할때
-            public int set;            
+            public int set;          
         }
         public enum Winds
         {

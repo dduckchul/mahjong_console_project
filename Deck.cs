@@ -4,6 +4,7 @@ namespace Mahjong
 {
     public class Deck
     {
+        public const int DistributedTiles = 52;
         struct PublicDeck
         {
             // 같이 쯔모하는 패산
