@@ -15,6 +15,7 @@ namespace Mahjong
             public string name;
             public int score;
             public bool isHuman;
+            public bool isPlaying;
             public Games.Winds wind;
             public Tiles.Tile[] hands;
             public Tiles.Tile[] discards;
@@ -105,6 +106,7 @@ namespace Mahjong
         }
         public static void PrintPlayers(Player[] players)
         {
+            PrintHeadInfo();
             foreach (Player p in players)
             {
                 PrintPlayer(p);
@@ -117,15 +119,24 @@ namespace Mahjong
         {
             PrintPlayerInfo(p);
             Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine();
             PrintPlayerHand(p);
             Console.WriteLine();
+            PrintPlayerDiscards(p);
             Console.ResetColor();
+        }
+
+        private static void PrintHeadInfo()
+        {
+            Console.Write("👦\t\t");
+            Console.Write("💯\t\t");
+            Console.Write("💨\t");
+            Console.Write("💭");
+            Console.WriteLine();            
         }
 
         private static void PrintPlayerInfo(Player p)
         {
-            Console.Write("👦\t");
+            Console.Write(p.name+"\t");
             if (p.isHuman)
             {
                 Console.Write("🙋\t");
@@ -134,25 +145,25 @@ namespace Mahjong
             {
                 Console.Write("\t");
             }
-            Console.Write("💯\t");
-            Console.Write("💨");
-            Console.WriteLine();
-            
-            Console.Write(p.name+"\t\t");
-            Console.Write(p.score+"\t");
-
+            Console.Write(p.score+"\t\t");
             switch (p.wind)
             {
                 case Games.Winds.East :
-                    Console.Write("🀀"); break;
+                    Console.Write("🀀\t"); break;
                 case Games.Winds.South :
-                    Console.Write("🀁"); break;
+                    Console.Write("🀁\t"); break;
                 case Games.Winds.West :
-                    Console.Write("🀂"); break;
+                    Console.Write("🀂\t"); break;
                 case Games.Winds.North :
-                    Console.Write("🀃"); break;
-                default : Console.Write("😱"); break;
+                    Console.Write("🀃\t"); break;
+                default : Console.Write("😱\t"); break;
             }
+
+            if (p.isPlaying)
+            {
+                Console.Write("🤯");
+            }
+            
             Console.WriteLine("");
         }
         private static void PrintPlayerHand(Player p)

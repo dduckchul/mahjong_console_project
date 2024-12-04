@@ -5,20 +5,26 @@ namespace Mahjong
     public class Deck
     {
         public const int DistributedTiles = 52;
-        struct PublicDeck
+
+        public const int PublicTiles = 70;
+        public const int DoraTiles = 5;
+        public const int UraDoraTiles = 5;
+        public const int YungsangTiles = 4;
+
+        public struct PublicDeck
         {
             // 같이 쯔모하는 패산
-            private Tiles[] openTiles;
+            public Tiles.Tile[] publicTiles;
             // 도라 계산시에 필요한 타일들
-            private Tiles[] doraTiles;
+            public Tiles.Tile[] doraTiles;
             // 리치시 계산시에 필요한 뒷도라 타일들
-            private Tiles[] uraDoraTiles;
+            public Tiles.Tile[] uraDoraTiles;
             // 깡 했을때 가져오는 영상패
-            private Tiles[] yungsangTiles;
+            public Tiles.Tile[] yungsangTiles;
             // 현재 덱에서 몇번 인덱스의 타일을 쓰는지 기록
-            private int currentTileIndex;
+            public int currentTileIndex;
             // 현재 덱에서 몇번 인덱스 까지 도라가 나왔는지 확인
-            private int currentDoraTileIndex;
+            public int currentDoraTileIndex;
         }
         
         // 마작 타일 생성 후 초기화 (136개)
@@ -124,5 +130,86 @@ namespace Mahjong
                 tiles[k] = temp;
             }
         }
+
+        public PublicDeck MakePublicDeck(Tiles.Tile[] tiles)
+        {
+            PublicDeck publicDeck = new PublicDeck();
+            publicDeck.publicTiles = new Tiles.Tile[PublicTiles];
+            publicDeck.doraTiles = new Tiles.Tile[DoraTiles];
+            publicDeck.uraDoraTiles = new Tiles.Tile[UraDoraTiles];
+            publicDeck.yungsangTiles = new Tiles.Tile[YungsangTiles];
+            
+            for (int i = 0; i < PublicTiles; i++)
+            {
+                int deckIndex = DistributedTiles + i;
+                publicDeck.publicTiles[i] = tiles[deckIndex];
+            }
+
+            for (int j = 0; j < DoraTiles; j++)
+            {
+                int deckIndex = DistributedTiles + PublicTiles + j;
+                publicDeck.doraTiles[j] = tiles[deckIndex];                
+            }
+
+            for (int k = 0; k < UraDoraTiles; k++)
+            {
+                int deckIndex = DistributedTiles + PublicTiles + DoraTiles + k;
+                publicDeck.uraDoraTiles[k] = tiles[deckIndex];
+            }
+
+            for (int l = 0; l < YungsangTiles; l++)
+            {
+                int deckIndex = DistributedTiles + PublicTiles + DoraTiles + UraDoraTiles + l;
+                publicDeck.yungsangTiles[l] = tiles[deckIndex];
+            }
+            
+            return publicDeck;
+        }
+
+        // 1. Sort By Type,
+        // 2. Sort By Number
+        public void SortMyHand(Players.Player player)
+        {
+            Tiles.Tile[] myHands = player.hands;
+            // 단순하게 하면.. Type 으로 정렬, Number 로 정렬 이중포문 두번
+            for (int i = 0; i < myHands.Length-1; i++)
+            {
+                for (int j = i + 1; j < myHands.Length-1; j++)
+                {
+                    int myTilesType = (int)myHands[i].type;
+                    int nextTilesType = (int)myHands[j].type;
+                    if (myTilesType > nextTilesType)
+                    {
+                        Tiles.Tile temp = myHands[j];
+                        myHands[j] = myHands[i];
+                        myHands[i] = temp;
+                    }
+                }
+            }
+            
+            // myTile 변경될때 인덱스를 기억해뒀다가 다시 정렬
+            for (int i = 0; i < myHands.Length-1; i++)
+            {
+                for (int j = i + 1; j < myHands.Length-1; j++)
+                {
+                    int myTileNumber = (int)myHands[i].tileNumber;
+                    int nextTileNumber = (int)myHands[j].tileNumber;
+                    int myTilesType = (int)myHands[i].type;
+                    int nextTilesType = (int)myHands[j].type;
+
+                    if (myTilesType != nextTilesType)
+                    {
+                        continue;
+                    }
+
+                    if (myTileNumber > nextTileNumber)
+                    {
+                        Tiles.Tile temp = myHands[j];
+                        myHands[j] = myHands[i];
+                        myHands[i] = temp;                        
+                    }
+                }
+            }
+        } 
     }
 }
