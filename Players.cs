@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 
 namespace Mahjong
 {
@@ -9,7 +10,7 @@ namespace Mahjong
         // 같이 마작 할사람 ㅠㅠ 4명이 있어야만 진행됨....
         public const int MaxPlayers = 4;
         public const int MaxHandTiles = 14;
-        public const int DiscardTiles = 20;
+        public const int MaxDiscardTiles = 30;
         public struct Player
         {
             public string name;
@@ -19,6 +20,7 @@ namespace Mahjong
             public Games.Winds wind;
             public Tiles.Tile[] hands;
             public Tiles.Tile[] discards;
+            public Tiles.Tile temp;
         }
 
         // 나는 초기화 했다고 가정, cpu 플레이어 생성해주기
@@ -42,7 +44,7 @@ namespace Mahjong
                 players[i].name = cpuName[i];
                 players[i].score = Score;
                 players[i].hands = new Tiles.Tile[MaxHandTiles];
-                players[i].discards = new Tiles.Tile[DiscardTiles];
+                players[i].discards = new Tiles.Tile[MaxDiscardTiles];
             }
             return players;
         }
@@ -64,7 +66,7 @@ namespace Mahjong
             me.score = Score;
             me.wind = Games.Winds.East;
             me.hands = new Tiles.Tile[MaxHandTiles];
-            me.discards = new Tiles.Tile[DiscardTiles];
+            me.discards = new Tiles.Tile[MaxDiscardTiles];
             me.isHuman = true;
             
             return me;
@@ -95,8 +97,8 @@ namespace Mahjong
                         tile.isShowingFront = true;
                     }
                     
-                    // 비어있는거 확인하려고 숫자 비교했는데 여기서 이상해짐, Man0으로 초기화되기 때문에 예외처리
-                    if (player.hands[j].type == Tiles.TileType.Man && player.hands[j].tileNumber == 0)
+                    // 비어있는거 확인하려고 숫자 비교했는데 여기서 이상해짐
+                    if (Tiles.IsValidTile(player.hands[j]) == false)
                     {
                         player.hands[j] = tile;
                         break;
@@ -106,6 +108,7 @@ namespace Mahjong
         }
         public static void PrintPlayers(Player[] players)
         {
+            Console.Clear();
             PrintHeadInfo();
             foreach (Player p in players)
             {
@@ -118,11 +121,11 @@ namespace Mahjong
         public static void PrintPlayer(Player p)
         {
             PrintPlayerInfo(p);
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
             PrintPlayerHand(p);
+            PrintPlayerTemp(p);
             Console.WriteLine();
             PrintPlayerDiscards(p);
-            Console.ResetColor();
+            Console.WriteLine("\n");
         }
 
         private static void PrintHeadInfo()
@@ -168,11 +171,25 @@ namespace Mahjong
         }
         private static void PrintPlayerHand(Player p)
         {
+            Console.Write("\n덱\t:\t");
             Tiles.PrintDeck(p.hands);
+        }
+
+        private static void PrintPlayerTemp(Player p)
+        {
+            if (Tiles.IsValidTile(p.temp))
+            {
+                Console.Write("\t\t");
+                // Console.BackgroundColor = ConsoleColor.DarkGreen;
+                Tiles.PrintTile(p.temp);
+                Console.ResetColor();
+                Console.Write("🤏");                
+            }
         }
 
         private static void PrintPlayerDiscards(Player p)
         {
+            Console.Write("🗑️\t:\t");
             Tiles.PrintDeck(p.discards);
         }
         
@@ -185,6 +202,54 @@ namespace Mahjong
             }
             
             return deck.publicTiles[deck.currentTileIndex++];
+        }
+
+        public static void UserAddTempAndDiscardTile(ref Player p)
+        {
+            Console.Clear();
+            // 핸드에 temp 더하기
+            p.hands[MaxHandTiles - 1] = p.temp;
+
+            // 핸드 정렬
+            Console.WriteLine("버릴 타일을 선택 해 주세요\n");
+            Tiles.PrintDeck(p.hands);
+            Console.Write("\n0 1 2 3 4 5 6 7 8 9 A B C D\n");
+            
+            ConsoleKeyInfo keyInfo;
+            bool parseResult = false;
+            // 스트링 -> 16진수 변환하기
+            // https://stackoverflow.com/questions/98559/how-to-parse-hex-values-into-a-uint
+            
+            int keyInt = 0;
+            while (!parseResult)
+            {
+                keyInfo = Console.ReadKey();
+                char key = keyInfo.KeyChar;
+                parseResult = int.TryParse(key.ToString(), 
+                    NumberStyles.HexNumber, CultureInfo.CurrentCulture, out keyInt);
+                if (parseResult)
+                {
+                    Console.WriteLine("선택한 숫자 : " + keyInt);
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("잘못된 키를 입력하셨습니다");
+                }                
+            }
+
+            DiscardTile(ref p, keyInt);
+        }
+        
+        // 선택한 타일 Discard 핸드에 넣고 버리기
+        // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
+        public static void DiscardTile(ref Player p, int keyInt)
+        {
+            Tiles.Tile discard = p.hands[keyInt];
+            p.hands[keyInt] = p.temp;
+            p.hands[MaxHandTiles - 1] = new Tiles.Tile();
+            p.discards[0] = discard;
+            Deck.SortMyHand(p);            
         }
     }
 }

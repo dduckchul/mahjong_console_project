@@ -6,12 +6,12 @@ namespace Mahjong
 {
     internal class Program
     {
+        static bool isRunning = true;
         public static void Main(string[] args)
         {
             // 시간 계산 위한 스톱워치 초기화
             Stopwatch watch = new Stopwatch();
             Deck deck = new Deck();
-            Tiles tiles = new Tiles();
             Players players = new Players();
 
             // 유저 키 입력 변수
@@ -19,19 +19,16 @@ namespace Mahjong
             
             // 덱 초기화
             Tiles.Tile[] pilesOfTile = deck.MakeInitDeck();
-            
             // 마작 패 초기화 잘 됐는지 출력
-            Tiles.PrintDeck(pilesOfTile);
+            // Tiles.PrintDeck(pilesOfTile);
             
             // 마작 덱 셔플
             deck.ShuffleDeck(pilesOfTile);
-
             // 마작 패 셔플 잘 됐는지 출력
             // tiles.PrintDeck(pilesOfTile);
+            
             Players.Player[] mahjongPlayers = players.InitPlayers();
             InitPlayersHand(mahjongPlayers, pilesOfTile);
-            
-            Console.Clear();
             Players.PrintPlayers(mahjongPlayers);
 
             Deck.PublicDeck publicDeck = deck.MakePublicDeck(pilesOfTile);
@@ -41,34 +38,44 @@ namespace Mahjong
             // 각 플레이어 손패 정렬
             foreach (Players.Player pl in mahjongPlayers)
             {
-                deck.SortMyHand(pl);                
+                Deck.SortMyHand(pl);                
             }
 
+            // 정렬 후 프린트 화면
             WaitUntilElapsedTime(watch, 500);
-            Console.Clear();
-            Players.PrintPlayers(mahjongPlayers);
-
+            Players.PrintPlayers(mahjongPlayers);            
+            
             // 동풍전 1국 1번장부터 시작
-            Games.Game game;
-            Console.WriteLine("디버깅...");
-            // game.game = 1;
-            // game.set = 1;
-            // game.currentWinds = Games.Winds.East;
-            //
-            // while (true)
-            // {
-            //     // 나부터 하나씩 뽑자
-            //     
-            //     // cpu 들이 하나씩 쯔모
-            //     
-            //     keyInfo = Console.ReadKey(true);
-            //
-            //     // 게임 종료시 ESC
-            //     if (keyInfo.Key == ConsoleKey.Escape)
-            //     {
-            //         break;
-            //     }
-            // }
+            Games.Game game = new Games.Game();
+            game.game = 1;
+            game.set = 1;
+            game.currentWinds = Games.Winds.East;
+            
+            // 정렬 후 프린트 화면
+            WaitUntilElapsedTime(watch, 500);
+            Games.FindFirstUser(mahjongPlayers, ref game);
+            
+            while (isRunning)
+            {
+                // 첫 화면 출력
+                int userInx = Games.FindPlayingUserInx(mahjongPlayers);
+                
+                // 나부터 하나씩 뽑자
+                Tiles.Tile tile = Players.Tsumo(ref publicDeck);
+
+                // 뽑은 타일은 보이게끔
+                tile.isVisible = true;
+                // 내가 뽑았으면 보이게끔
+                if (mahjongPlayers[userInx].isHuman)
+                {
+                    tile.isShowingFront = true;
+                }
+                mahjongPlayers[userInx].temp = tile;
+                
+                Players.PrintPlayers(mahjongPlayers);
+                PrintTurnAndAction(mahjongPlayers[userInx]);
+                PressKeyAndAction(ref mahjongPlayers[userInx] ,watch);
+            }
         }
 
         public static void InitPlayersHand(Players.Player[] mahjongPlayers, Tiles.Tile[] mahjongTiles)
@@ -94,7 +101,6 @@ namespace Mahjong
                     for (int j = 0; j < mahjongPlayers.Length; j++)
                     {
                         WaitUntilElapsedTime(watch2, waitTimeLong);
-                        Console.Clear();
                         Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], wantToDistribute, tileIndex);
                         Players.PrintPlayers(mahjongPlayers);
                         tileIndex += wantToDistribute;
@@ -106,7 +112,6 @@ namespace Mahjong
                     for (int j = 0; j < mahjongPlayers.Length; j++)
                     {
                         WaitUntilElapsedTime(watch2, waitTimeLong);
-                        Console.Clear();                        
                         Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], remainderTiles, tileIndex);
                         Players.PrintPlayers(mahjongPlayers);
                         tileIndex += remainderTiles;
@@ -115,7 +120,7 @@ namespace Mahjong
             }         
         }
 
-        // 멀까~요
+        // Thread.sleep 대신 변경
         public static void WaitUntilElapsedTime(Stopwatch watch, long waitTime)
         {
             watch.Reset();
@@ -127,6 +132,46 @@ namespace Mahjong
                     // 여기서 리셋 해주니까 시간이 계속 흐름 // watch.Reset();
                     break;
                 }
+            }
+        }
+
+        public static void PrintTurnAndAction(Players.Player player)
+        {
+            Console.Write($"{player.name}님의 차례입니다 ");
+            Console.Write("1️⃣ 버리기 ");
+            Console.Write("2️⃣ 리치 ");
+            Console.Write("3️⃣ 쯔모 ");
+            Console.Write("0️⃣ 종료");
+            Console.WriteLine();
+        }
+
+        public static void PressKeyAndAction(ref Players.Player player, Stopwatch watch)
+        {
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            if (keyInfo.Key == ConsoleKey.D1)
+            {
+                Console.WriteLine("버릴 타일을 선택해 주세요");
+                Players.UserAddTempAndDiscardTile(ref player);
+                WaitUntilElapsedTime(watch, 200);
+            }
+            
+            if (keyInfo.Key == ConsoleKey.D2)
+            {
+                Console.WriteLine("🚜👷리치 구현중....⛏️");
+                WaitUntilElapsedTime(watch, 200);
+            }
+
+            if (keyInfo.Key == ConsoleKey.D3)
+            {
+                Console.WriteLine("🚜👷쯔모 구현중....⛏️");
+                WaitUntilElapsedTime(watch, 200);
+            }
+
+            if (keyInfo.Key == ConsoleKey.D0)
+            {
+                isRunning = false;
+                Console.WriteLine("게임을 종료합니다..👋");
+                WaitUntilElapsedTime(watch, 200);
             }
         }
     }

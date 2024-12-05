@@ -1,3 +1,5 @@
+using System;
+
 namespace Mahjong
 {
     public class Games
@@ -55,23 +57,46 @@ namespace Mahjong
         }
 
         // 게임마다 첫 번째 턴인 유저에게 턴을 준다.
-        public void FindFirstUser(Players.Player[] players, ref Game game)
+        // 동 1국 = wind + 1 = (0+1) - 1 % 4 = 0 (동)
+        // 동 2국 = wind + 2 = (0+2) - 1 % 4 = 1 (남)
+        // 남 3국 = wind + 3 = (1+3) - 1 % 4 = 3 (북)
+        // 북 4국 = wind + 4 = (3+4) - 1 % 4 = 6 % 4 = 2 (서)
+        public static void FindFirstUser(Players.Player[] players, ref Game game)
         {
-            
+            Winds wind = game.currentWinds;
+            int currentGame = game.game;
+
+            int currentPlayerIndex = (int)(wind + currentGame - 1) % 4;
+            players[currentPlayerIndex].isPlaying = true;
         }
 
         // 현재 플레이중인 유저의 인덱스를 반환한다.
-        public int FindPlayingUserInx(Players.Player[] players)
+        public static int FindPlayingUserInx(Players.Player[] players)
         {
             for (int i = 0; i < players.Length; i++)
             {
-                if (players[i].isPlaying == true)
+                if (players[i].isPlaying)
                 {
                     return i;
                 }
             }
-
+            Console.WriteLine("여기까지 가믄 안되요!!!!");
             return -1;
+        }
+
+        // 다음 턴 유저 인덱스 반환
+        public static int FindNextUserInx(Players.Player[] players)
+        {
+            int playingUserInx = FindPlayingUserInx(players);
+            playingUserInx++;
+            
+            // 유저 인덱스가 4 (마지막 유저 + 1 일때) 처음 유저 0으로 반환한다.
+            if (playingUserInx == players.Length)
+            {
+                return 0;
+            }
+
+            return playingUserInx;
         }
     }
 }

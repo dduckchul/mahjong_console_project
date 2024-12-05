@@ -124,7 +124,7 @@ namespace Mahjong
             if (Console.BackgroundColor == ConsoleColor.DarkGreen && tile.isDora)
             {
                 Console.ResetColor();
-                Console.BackgroundColor = ConsoleColor.DarkGreen;
+                // Console.BackgroundColor = ConsoleColor.DarkGreen;
             }
             else if (tile.isDora)
             {
@@ -134,15 +134,27 @@ namespace Mahjong
 
         public static void PrintDeck(Tile[] tiles)
         {
+            // Console.BackgroundColor = ConsoleColor.DarkGreen;
             for (int i = 0; i < tiles.Length; i++)
             {
                 PrintTile(tiles[i]);
             }
+            Console.ResetColor();
         }
 
         public static bool IsNumberTiles(TileType type)
         {
             return (int)type < (int)TileType.Wind;
+        }
+
+        public static bool IsValidTile(Tile tile)
+        {
+            if (tile.type == TileType.Man && tile.tileNumber == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

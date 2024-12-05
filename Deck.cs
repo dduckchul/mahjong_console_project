@@ -173,7 +173,7 @@ namespace Mahjong
 
         // 1. Sort By Type,
         // 2. Sort By Number
-        public void SortMyHand(Players.Player player)
+        public static void SortMyHand(Players.Player player)
         {
             Tiles.Tile[] myHands = player.hands;
             // 단순하게 하면.. Type 으로 정렬, Number 로 정렬 이중포문 두번
