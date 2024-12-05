@@ -18,6 +18,8 @@ namespace Mahjong
             public int score;
             public bool isHuman;
             public bool isPlaying;
+            public bool isRiichi;
+            public bool isCrying;
             public Games.Winds wind;
             public Tiles.Tile[] hands;
             public Tiles.Tile[] discards;
@@ -123,15 +125,16 @@ namespace Mahjong
         private static void PrintPlayerInfo(Player p)
         {
             Console.Write(p.name+"\t");
+            
             if (p.isHuman)
             {
-                Console.Write("🙋\t");
+                Console.Write("👤");
             }
             else
             {
-                Console.Write("\t");
+                Console.Write("💻");
             }
-            Console.Write(p.score+"\t\t");
+
             switch (p.wind)
             {
                 case Games.Winds.East :
@@ -143,6 +146,17 @@ namespace Mahjong
                 case Games.Winds.North :
                     Console.Write("🀃\t"); break;
                 default : Console.Write("😱\t"); break;
+            }            
+            
+            Console.Write(p.score+"\t");
+            
+            if (p.isRiichi)
+            {
+                Console.Write("🛑\t");                
+            }
+            else
+            {
+                Console.Write("\t");
             }
 
             if (p.isPlaying)
@@ -154,7 +168,7 @@ namespace Mahjong
         }
         private static void PrintPlayerHand(Player p)
         {
-            Console.Write("\n덱\t:\t");
+            Console.Write("덱\t:\t");
             Tiles.PrintDeck(p.hands);
         }
 
@@ -226,11 +240,23 @@ namespace Mahjong
             DiscardTile(ref p, keyInt);
         }
         
+        // 컴퓨터가 하는 행동
+        // To-Do : 더 업그레이드 하면 좋겠지만 그냥 랜덤으로 뽑아서 버리자
+        public static void AiAddTempAndDiscardTile(ref Player p)
+        {
+            // 핸드에 temp 더하기
+            p.hands[MaxHandTiles - 1] = p.temp;            
+            Random rand = new Random();
+            DiscardTile(ref p, rand.Next(0,MaxHandTiles));
+        }
+        
         // 선택한 타일 Discard 핸드에 넣고 버리기
         // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
+        // 버림패는 무조건 공개
         public static void DiscardTile(ref Player p, int keyInt)
         {
             Tiles.Tile discard = p.hands[keyInt];
+            discard.isShowingFront = true;
             p.hands[keyInt] = p.temp;
             p.hands[MaxHandTiles - 1] = new Tiles.Tile();
 

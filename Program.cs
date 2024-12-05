@@ -30,6 +30,7 @@ namespace Mahjong
             Players.Player[] mahjongPlayers = players.InitPlayers();
             InitPlayersHand(mahjongPlayers, pilesOfTile);
             Games.PrintGames(mahjongPlayers);
+            
             // 공용 덱 구성하고 도라 타일 1개 열기
             Deck.PublicDeck publicDeck = deck.MakePublicDeck(pilesOfTile);
             Deck.initDora(ref publicDeck);
@@ -73,12 +74,16 @@ namespace Mahjong
                     tile.isShowingFront = true;
                 }
                 mahjongPlayers[userInx].temp = tile;
-                Games.PrintGames(publicDeck, mahjongPlayers);
+                Games.PrintGames(game, publicDeck, mahjongPlayers);
                 
                 PrintTurnAndAction(watch, mahjongPlayers[userInx]);
                 if (mahjongPlayers[userInx].isHuman)
                 {
                     PressKeyAndAction(ref mahjongPlayers[userInx], watch);                    
+                }
+                else
+                {
+                    ComputerAction(ref mahjongPlayers[userInx]);
                 }
 
                 // 키 입력후에는 한턴 넘어가는것으로 판단한다.
@@ -147,15 +152,15 @@ namespace Mahjong
         public static void PrintTurnAndAction(Stopwatch watch, Players.Player player)
         {
             WaitUntilElapsedTime(watch, 1000);
-            Console.Write($"{player.name}님의 차례입니다 ");
+            Console.Write($"{player.name}님의 순서! ");
             if (player.isHuman)
             {
-                Console.Write("1️⃣ 버리기 ");
-                Console.Write("2️⃣ 리치 ");
-                Console.Write("3️⃣ 쯔모 ");
-                Console.Write("4️⃣ 깡 ");
-                Console.Write("0️⃣ 종료");
-                Console.WriteLine();                
+                Console.Write("1️⃣  버리기 ");
+                Console.Write("2️⃣  리치 ");
+                Console.Write("3️⃣  쯔모 ");
+                Console.Write("4️⃣  깡 ");
+                Console.Write("0️⃣  종료");
+                Console.WriteLine("");
             }
             else
             {
@@ -209,6 +214,11 @@ namespace Mahjong
                     Console.WriteLine("잘못된 키입니다.");
                 }                
             }
+        }
+
+        public static void ComputerAction(ref Players.Player player)
+        {
+            Players.AiAddTempAndDiscardTile(ref player);
         }
     }
 }

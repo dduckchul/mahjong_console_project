@@ -16,8 +16,6 @@ namespace Mahjong
             public int game;
             // 현재 N번째 장인지 저장할때
             public int set;
-            // 현재 게임에서 플레이중인 유저를 기억하는 인덱스
-            public int turn;
         }
         public enum Winds
         {
@@ -102,17 +100,22 @@ namespace Mahjong
         // 일단 임시로 다형성 추가
         public static void PrintGames(Players.Player[] players)
         {
-            PrintGames(new Deck.PublicDeck(), players);
+            PrintGames(new Game(), new Deck.PublicDeck(), players);
         }        
         
         // 게임의 전체 화면 보여주는 메서드
-        public static void PrintGames(Deck.PublicDeck publicDeck, Players.Player[] players)
+        public static void PrintGames(Game game, Deck.PublicDeck publicDeck, Players.Player[] players)
         {
             Console.Clear();
+            if (game.set != 0)
+            {
+                PrintGameInfo(game);                
+            }
             PrintHeadInfo();
             if (publicDeck.publicTiles != null)
             {
-                PrintDoraTiles(publicDeck);                
+                PrintDoraTiles(publicDeck);
+                PrintLeftTiles(publicDeck);
             }
             Console.WriteLine();
             foreach (Players.Player p in players)
@@ -120,20 +123,77 @@ namespace Mahjong
                 Players.PrintPlayer(p);
             }
         }
+
+        public static void PrintGameInfo(Game game)
+        {
+            string wind = "😱";
+            switch (game.currentWinds)
+            {
+                case Winds.East :
+                    wind = "🀀"; break;
+                case Winds.South :
+                    wind = "🀁"; break;
+                case Winds.West :
+                    wind = "🀂"; break;                    
+                case Winds.North :
+                    wind = "🀃"; break;               
+                default : Console.Write("😱\t"); break;
+            }
+
+            String title = wind + "  " + ReturnIntToEmoji(game.game) + "  국 " + ReturnIntToEmoji(game.set) + "  번장";
+            int startPos = (Console.WindowWidth - title.Length) / 2;
+            Console.SetCursorPosition(startPos, Console.CursorTop);
+            
+            Console.WriteLine(title);
+        }
         
         // 게임 위 정보 화면
         public static void PrintHeadInfo()
         {
-            Console.Write("👦\t\t");
-            Console.Write("💯\t\t");
+            Console.Write("👦\t");
             Console.Write("💨\t");
+            Console.Write("💯\t");
+            Console.Write("🙋\t");
             Console.Write("💭");
         }
 
         public static void PrintDoraTiles(Deck.PublicDeck publicDeck)
         {
-            Console.Write("\t도라 : ");
+            Console.Write("  도라 : ");
             Tiles.PrintDeck(publicDeck.doraTiles);
+        }
+
+        public static void PrintLeftTiles(Deck.PublicDeck publicDeck)
+        {
+            int leftTiles = Deck.PublicTiles - publicDeck.currentTileIndex;
+
+            int ten = leftTiles / 10 % 10;
+            int one = leftTiles % 10;
+            
+            Console.Write("  🀫 ✖️ " + ReturnIntToEmoji(ten) + " " + ReturnIntToEmoji(one));            
+        }
+
+        public static void isDrawGame()
+        {
+            
+        }
+        
+        public static string ReturnIntToEmoji(int value)
+        {
+            switch (value)
+            {
+                case 0: return "0️⃣";
+                case 1: return "1️⃣";
+                case 2: return "2️⃣";
+                case 3: return "3️⃣";
+                case 4: return "4️⃣";
+                case 5: return "5️⃣";
+                case 6: return "6️⃣";
+                case 7: return "7️⃣";
+                case 8: return "8️⃣";
+                case 9: return "9️⃣";                
+                default: return "😱";
+            }
         }
     }
 }
