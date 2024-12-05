@@ -14,9 +14,6 @@ namespace Mahjong
             Deck deck = new Deck();
             Players players = new Players();
 
-            // 유저 키 입력 변수
-            ConsoleKeyInfo keyInfo;
-            
             // 덱 초기화
             Tiles.Tile[] pilesOfTile = deck.MakeInitDeck();
             // 마작 패 초기화 잘 됐는지 출력
@@ -148,6 +145,24 @@ namespace Mahjong
                 }
             }
         }
+        
+        public static string ReturnIntToEmoji(int value)
+        {
+            switch (value)
+            {
+                case 0: return "0️⃣";
+                case 1: return "1️⃣";
+                case 2: return "2️⃣";
+                case 3: return "3️⃣";
+                case 4: return "4️⃣";
+                case 5: return "5️⃣";
+                case 6: return "6️⃣";
+                case 7: return "7️⃣";
+                case 8: return "8️⃣";
+                case 9: return "9️⃣";                
+                default: return "😱";
+            }
+        }        
 
         public static void PrintTurnAndAction(Stopwatch watch, Players.Player player)
         {

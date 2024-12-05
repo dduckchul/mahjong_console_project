@@ -140,10 +140,13 @@ namespace Mahjong
                 default : Console.Write("😱\t"); break;
             }
 
-            String title = wind + "  " + ReturnIntToEmoji(game.game) + "  국 " + ReturnIntToEmoji(game.set) + "  번장";
+            string windStr = wind + "  ";
+            string gameStr = Program.ReturnIntToEmoji(game.game) + " 국";
+            string setStr = Program.ReturnIntToEmoji(game.set) + " 번장";
+            
+            string title = windStr + gameStr + setStr;
             int startPos = (Console.WindowWidth - title.Length) / 2;
             Console.SetCursorPosition(startPos, Console.CursorTop);
-            
             Console.WriteLine(title);
         }
         
@@ -169,31 +172,14 @@ namespace Mahjong
 
             int ten = leftTiles / 10 % 10;
             int one = leftTiles % 10;
-            
-            Console.Write("  🀫 ✖️ " + ReturnIntToEmoji(ten) + " " + ReturnIntToEmoji(one));            
+
+            string leftStr = "  🀫 ✖️ " + Program.ReturnIntToEmoji(ten) + " " + Program.ReturnIntToEmoji(one);
+            Console.Write(leftStr);            
         }
 
-        public static void isDrawGame()
+        public static bool isDrawGame(Deck.PublicDeck publicDeck)
         {
-            
-        }
-        
-        public static string ReturnIntToEmoji(int value)
-        {
-            switch (value)
-            {
-                case 0: return "0️⃣";
-                case 1: return "1️⃣";
-                case 2: return "2️⃣";
-                case 3: return "3️⃣";
-                case 4: return "4️⃣";
-                case 5: return "5️⃣";
-                case 6: return "6️⃣";
-                case 7: return "7️⃣";
-                case 8: return "8️⃣";
-                case 9: return "9️⃣";                
-                default: return "😱";
-            }
+            return publicDeck.currentTileIndex == Deck.PublicTiles;
         }
     }
 }
