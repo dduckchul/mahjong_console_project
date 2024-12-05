@@ -17,8 +17,11 @@ namespace Mahjong
             public string name;
             public int score;
             public bool isHuman;
+            // 지금 나의 턴인지 확인하는 플래그
             public bool isPlaying;
+            // 내가 리치 선언했는지 확인하는 플래그
             public bool isRiichi;
+            // 내가 울었는지 확인하는 플래그
             public bool isCrying;
             public Games.Winds wind;
             public Tiles.Tile[] hands;
@@ -46,8 +49,6 @@ namespace Mahjong
                 players[i].wind = (Games.Winds)Enum.Parse(typeof(Games.Winds), i.ToString());
                 players[i].name = cpuName[i];
                 players[i].score = Score;
-                players[i].hands = new Tiles.Tile[MaxHandTiles];
-                players[i].discards = new Tiles.Tile[MaxDiscardTiles];
             }
             return players;
         }
@@ -68,8 +69,6 @@ namespace Mahjong
             me.name = playerName;
             me.score = Score;
             me.wind = Games.Winds.East;
-            me.hands = new Tiles.Tile[MaxHandTiles];
-            me.discards = new Tiles.Tile[MaxDiscardTiles];
             me.isHuman = true;
             
             return me;

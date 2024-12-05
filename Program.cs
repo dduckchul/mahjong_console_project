@@ -9,129 +9,39 @@ namespace Mahjong
         static bool isRunning = true;
         public static void Main(string[] args)
         {
-            // 시간 계산 위한 스톱워치 초기화
-            Stopwatch watch = new Stopwatch();
-            Deck deck = new Deck();
             Players players = new Players();
 
-            // 덱 초기화
-            Tiles.Tile[] pilesOfTile = deck.MakeInitDeck();
-            // 마작 패 초기화 잘 됐는지 출력
-            // Tiles.PrintDeck(pilesOfTile);
+            // 게임 시작, 플레이어 초기화
+            Players.Player[] mahjongPlayers = players.InitPlayers();    
             
-            // 마작 덱 셔플
-            deck.ShuffleDeck(pilesOfTile);
-            // 마작 패 셔플 잘 됐는지 출력
-            // tiles.PrintDeck(pilesOfTile);
-            
-            Players.Player[] mahjongPlayers = players.InitPlayers();
-            InitPlayersHand(mahjongPlayers, pilesOfTile);
-            Games.PrintGames(mahjongPlayers);
-            
-            // 공용 덱 구성하고 도라 타일 1개 열기
-            Deck.PublicDeck publicDeck = deck.MakePublicDeck(pilesOfTile);
-            Deck.initDora(ref publicDeck);
-            // publicDeck 구성 잘 되었는지 확인
-            // Console.WriteLine(publicDeck);
-            
-            // 각 플레이어 손패 정렬
-            foreach (Players.Player pl in mahjongPlayers)
-            {
-                Deck.SortMyHand(pl);                
-            }
-
-            // 정렬 후 프린트 화면
-            WaitUntilElapsedTime(watch, 500);
-            Games.PrintGames(mahjongPlayers);            
-            
-            // 동풍전 1국 1번장부터 시작
+            // 게임 초기화. 동풍전 1국 1번장부터 시작, 유저와 덱 모두 초기화
             Games.Game game = new Games.Game();
-            game.game = 1;
-            game.set = 1;
             game.currentWinds = Games.Winds.East;
-            
-            // 정렬 후 프린트 화면
-            WaitUntilElapsedTime(watch, 500);
-            Games.FindFirstUser(mahjongPlayers, ref game);
-            
+            // 게임 초기화시 세트처럼 반복문에 넘길것
+            game.isGameContinue = true;
+            game.isSetContinue = true;            
+
+            // 게임 진짜 시작
             while (isRunning)
             {
-                // 첫 화면 출력
-                int userInx = Games.FindPlayingUserInx(mahjongPlayers);
-                int nextUserInx = Games.FindNextUserInx(mahjongPlayers);
-                // 나부터 하나씩 뽑자
-                Tiles.Tile tile = Players.Tsumo(ref publicDeck);
-
-                // 뽑은 타일은 보이게끔
-                tile.isVisible = true;
-                
-                // 내가 뽑았으면 보이게끔
-                if (mahjongPlayers[userInx].isHuman)
+                game.game++;
+                game.isGameContinue = true;
+                while (isRunning && game.isGameContinue)
                 {
-                    tile.isShowingFront = true;
+                    // 게임 초기화
+                    Games.InitGame(ref mahjongPlayers, ref game);
+                    Games.FindFirstUser(ref mahjongPlayers, game);
+                    game.set++;
+                    game.isSetContinue = true;
+                    while (isRunning && game.isSetContinue)
+                    {
+                        KeepPlayingSet(ref mahjongPlayers, ref game);
+                    }                    
                 }
-                mahjongPlayers[userInx].temp = tile;
-                Games.PrintGames(game, publicDeck, mahjongPlayers);
-                
-                PrintTurnAndAction(watch, mahjongPlayers[userInx]);
-                if (mahjongPlayers[userInx].isHuman)
-                {
-                    PressKeyAndAction(ref mahjongPlayers[userInx], watch);                    
-                }
-                else
-                {
-                    ComputerAction(ref mahjongPlayers[userInx]);
-                }
-
-                // 키 입력후에는 한턴 넘어가는것으로 판단한다.
-                mahjongPlayers[userInx].isPlaying = false;
-                mahjongPlayers[nextUserInx].isPlaying = true;
             }
         }
 
-        public static void InitPlayersHand(Players.Player[] mahjongPlayers, Tiles.Tile[] mahjongTiles)
-        {
-            Stopwatch watch2 = new Stopwatch();
-            // 현재 분배중인 덱 인덱스
-            int tileIndex = 0;
-            int distributeTimes = 3;
-            // 처음은 핸드 최대값 -1 만큼 분배, 분배를 n번으로 쪼개고싶다
-            int wantToDistribute = (Players.MaxHandTiles-1) / distributeTimes;
-            // 마지막 for-loop 에서 줘야하는 타일값
-            int remainderTiles = (Players.MaxHandTiles-1) % distributeTimes;
-            
-            // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
-            long waitTimeLong = 100;            
-            
-            // 반복해서 13개 타일을 n번 분배하는 기능
-            for (int i = 0; i < distributeTimes + 1; i++)
-            {
-                // wantToDistribute 만큼 타일 분배
-                if (i < distributeTimes)
-                {
-                    for (int j = 0; j < mahjongPlayers.Length; j++)
-                    {
-                        WaitUntilElapsedTime(watch2, waitTimeLong);
-                        Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], wantToDistribute, tileIndex);
-                        Games.PrintGames(mahjongPlayers);
-                        tileIndex += wantToDistribute;
-                    }     
-                }
-                // 마지막 반복에서는 나머지 타일만 준다
-                if (i == distributeTimes)
-                {
-                    for (int j = 0; j < mahjongPlayers.Length; j++)
-                    {
-                        WaitUntilElapsedTime(watch2, waitTimeLong);
-                        Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], remainderTiles, tileIndex);
-                        Games.PrintGames(mahjongPlayers);
-                        tileIndex += remainderTiles;
-                    }
-                }
-            }         
-        }
-
-        // Thread.sleep 대신 변경
+        // Thread.sleep 대신 변경, 디버그용으로 멈추는 애니메이션 없에고싶으면 다 주석처리
         public static void WaitUntilElapsedTime(Stopwatch watch, long waitTime)
         {
             watch.Reset();
@@ -163,6 +73,51 @@ namespace Mahjong
                 default: return "😱";
             }
         }        
+        
+        public static void KeepPlayingSet(ref Players.Player[] mahjongPlayers, ref Games.Game game)
+        {
+            Stopwatch watch = new Stopwatch();            
+            int userInx = Games.FindPlayingUserInx(mahjongPlayers);
+            int nextUserInx = Games.FindNextUserInx(mahjongPlayers);
+
+            // 나부터 하나씩 뽑자
+            Tiles.Tile tile = Players.Tsumo(ref game.publicDeck);
+            // 뽑은 타일은 보이게끔
+            tile.isVisible = true;
+            // 내가 뽑았으면 보이게끔
+            if (mahjongPlayers[userInx].isHuman)
+            {
+                tile.isShowingFront = true;
+            }
+            mahjongPlayers[userInx].temp = tile;
+
+            WaitUntilElapsedTime(watch, 500);
+            Games.PrintGames(game, game.publicDeck, mahjongPlayers);
+                
+            PrintTurnAndAction(watch, mahjongPlayers[userInx]);
+            if (mahjongPlayers[userInx].isHuman)
+            {
+                PressKeyAndAction(ref mahjongPlayers[userInx], watch);                    
+            }
+            else
+            {
+                ComputerAction(ref mahjongPlayers[userInx]);
+            }
+
+            // 키 입력후에는 한턴 넘어가는것으로 판단한다.
+            mahjongPlayers[userInx].isPlaying = false;
+            mahjongPlayers[nextUserInx].isPlaying = true;
+            
+            // 게임 유국 조건이면 무승부를 띄우고 게임 초기화, 세트는 0번으로
+            bool isDrawGame = Games.IsDrawGame(game.publicDeck, mahjongPlayers);
+            if (isDrawGame)
+            {
+                game.set = 0;
+                game.isGameContinue = false;
+                game.isSetContinue = false;
+                mahjongPlayers[nextUserInx].isPlaying = false;
+            }
+        }        
 
         public static void PrintTurnAndAction(Stopwatch watch, Players.Player player)
         {
@@ -180,7 +135,7 @@ namespace Mahjong
             else
             {
                 int computerThinking = 3;
-                long waitTime = 1000;
+                long waitTime = 300;
                 
                 Console.Write("컴퓨터 생각중... ");
                 for (int i = 0; i < computerThinking; i++)

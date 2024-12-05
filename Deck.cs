@@ -29,7 +29,7 @@ namespace Mahjong
         }
         
         // 마작 타일 생성 후 초기화 (136개)
-        public Tiles.Tile[] MakeInitDeck()
+        public static Tiles.Tile[] MakeInitDeck()
         {
             Tiles.Tile[] tiles = new Tiles.Tile[MahjongMaxTiles];
 
@@ -75,7 +75,7 @@ namespace Mahjong
             return tiles;
         }
 
-        private Tiles.Tile[] MakeTypeTiles(Tiles.TileType type, bool makeRedDora)
+        private static Tiles.Tile[] MakeTypeTiles(Tiles.TileType type, bool makeRedDora)
         {
             int tilesMaxInt = 0;
             
@@ -123,7 +123,7 @@ namespace Mahjong
 
         // Fisher–Yates shuffle
         // https://stackoverflow.com/questions/108819/best-way-to-randomize-an-array-with-net
-        public void ShuffleDeck(Tiles.Tile[] tiles)
+        public static void ShuffleDeck(Tiles.Tile[] tiles)
         {
             int n = tiles.Length;
             Random random = new Random();
@@ -136,7 +136,7 @@ namespace Mahjong
             }
         }
 
-        public PublicDeck MakePublicDeck(Tiles.Tile[] tiles)
+        public static PublicDeck MakePublicDeck(Tiles.Tile[] tiles)
         {
             PublicDeck publicDeck = new PublicDeck();
             publicDeck.publicTiles = new Tiles.Tile[PublicTiles];
