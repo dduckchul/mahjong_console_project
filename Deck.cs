@@ -215,6 +215,31 @@ namespace Mahjong
                     }
                 }
             }
-        } 
+        }
+
+        // 덱의 도라를 0번으로 초기화하고, 나머지 도라들을 뒤집은 상태로 둔다
+        public static void initDora(ref PublicDeck deck)
+        {
+            deck.currentDoraTileIndex = 0;
+            int doraInx = deck.currentDoraTileIndex;
+
+            for (int i = 0; i < deck.doraTiles.Length; i++)
+            {
+                if (doraInx == i)
+                {
+                    deck.doraTiles[i].isShowingFront = true;                    
+                }
+                deck.doraTiles[i].isVisible = true;
+            }
+            
+        }
+        
+        // 도라 타일 더 열어야 할때
+        public static void OpenDora(ref PublicDeck deck)
+        {
+            int doraInx = deck.currentDoraTileIndex++;
+            deck.doraTiles[doraInx].isVisible = true;
+            deck.doraTiles[doraInx].isShowingFront = true;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace Mahjong
@@ -106,15 +107,6 @@ namespace Mahjong
                 }            
             }
         }
-        public static void PrintPlayers(Player[] players)
-        {
-            Console.Clear();
-            PrintHeadInfo();
-            foreach (Player p in players)
-            {
-                PrintPlayer(p);
-            }
-        }
 
         // C# 콘솔창 오른쪽 텍스트 출력
         // https://stackoverflow.com/questions/6913563/c-sharp-align-text-right-in-console
@@ -126,15 +118,6 @@ namespace Mahjong
             Console.WriteLine();
             PrintPlayerDiscards(p);
             Console.WriteLine("\n");
-        }
-
-        private static void PrintHeadInfo()
-        {
-            Console.Write("👦\t\t");
-            Console.Write("💯\t\t");
-            Console.Write("💨\t");
-            Console.Write("💭");
-            Console.WriteLine();            
         }
 
         private static void PrintPlayerInfo(Player p)
@@ -206,7 +189,9 @@ namespace Mahjong
 
         public static void UserAddTempAndDiscardTile(ref Player p)
         {
+            Stopwatch watch = new Stopwatch();
             Console.Clear();
+            
             // 핸드에 temp 더하기
             p.hands[MaxHandTiles - 1] = p.temp;
 
@@ -217,10 +202,10 @@ namespace Mahjong
             
             ConsoleKeyInfo keyInfo;
             bool parseResult = false;
-            // 스트링 -> 16진수 변환하기
-            // https://stackoverflow.com/questions/98559/how-to-parse-hex-values-into-a-uint
-            
             int keyInt = 0;
+            
+            // 스트링 -> 16진수 변환하기
+            // https://stackoverflow.com/questions/98559/how-to-parse-hex-values-into-a-uint            
             while (!parseResult)
             {
                 keyInfo = Console.ReadKey();
@@ -229,7 +214,8 @@ namespace Mahjong
                     NumberStyles.HexNumber, CultureInfo.CurrentCulture, out keyInt);
                 if (parseResult)
                 {
-                    Console.WriteLine("선택한 숫자 : " + keyInt);
+                    Program.WaitUntilElapsedTime(watch, 200);
+                    Console.WriteLine(" 선택한 숫자 : " + keyInt);
                     break;
                 }
                 else
@@ -237,7 +223,6 @@ namespace Mahjong
                     Console.WriteLine("잘못된 키를 입력하셨습니다");
                 }                
             }
-
             DiscardTile(ref p, keyInt);
         }
         
@@ -248,8 +233,25 @@ namespace Mahjong
             Tiles.Tile discard = p.hands[keyInt];
             p.hands[keyInt] = p.temp;
             p.hands[MaxHandTiles - 1] = new Tiles.Tile();
-            p.discards[0] = discard;
-            Deck.SortMyHand(p);            
+
+            int lastDiscard = FindLastDiscardInx(p);
+            p.discards[lastDiscard] = discard;
+            p.temp = new Tiles.Tile();
+            
+            Deck.SortMyHand(p);
+        }
+
+        // 비어있는 공간 찾기
+        public static int FindLastDiscardInx(Player p)
+        {
+            for (int i = 0; i < p.discards.Length; i++)
+            {
+                if (!Tiles.IsValidTile(p.discards[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }

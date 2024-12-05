@@ -132,6 +132,7 @@ namespace Mahjong
             }
         }
 
+        // To-Do 마지막 버린 타일을 색 변경해서 보여주고싶다
         public static void PrintDeck(Tile[] tiles)
         {
             // Console.BackgroundColor = ConsoleColor.DarkGreen;

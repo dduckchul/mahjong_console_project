@@ -29,9 +29,10 @@ namespace Mahjong
             
             Players.Player[] mahjongPlayers = players.InitPlayers();
             InitPlayersHand(mahjongPlayers, pilesOfTile);
-            Players.PrintPlayers(mahjongPlayers);
-
+            Games.PrintGames(mahjongPlayers);
+            // 공용 덱 구성하고 도라 타일 1개 열기
             Deck.PublicDeck publicDeck = deck.MakePublicDeck(pilesOfTile);
+            Deck.initDora(ref publicDeck);
             // publicDeck 구성 잘 되었는지 확인
             // Console.WriteLine(publicDeck);
             
@@ -43,7 +44,7 @@ namespace Mahjong
 
             // 정렬 후 프린트 화면
             WaitUntilElapsedTime(watch, 500);
-            Players.PrintPlayers(mahjongPlayers);            
+            Games.PrintGames(mahjongPlayers);            
             
             // 동풍전 1국 1번장부터 시작
             Games.Game game = new Games.Game();
@@ -59,22 +60,30 @@ namespace Mahjong
             {
                 // 첫 화면 출력
                 int userInx = Games.FindPlayingUserInx(mahjongPlayers);
-                
+                int nextUserInx = Games.FindNextUserInx(mahjongPlayers);
                 // 나부터 하나씩 뽑자
                 Tiles.Tile tile = Players.Tsumo(ref publicDeck);
 
                 // 뽑은 타일은 보이게끔
                 tile.isVisible = true;
+                
                 // 내가 뽑았으면 보이게끔
                 if (mahjongPlayers[userInx].isHuman)
                 {
                     tile.isShowingFront = true;
                 }
                 mahjongPlayers[userInx].temp = tile;
+                Games.PrintGames(publicDeck, mahjongPlayers);
                 
-                Players.PrintPlayers(mahjongPlayers);
-                PrintTurnAndAction(mahjongPlayers[userInx]);
-                PressKeyAndAction(ref mahjongPlayers[userInx] ,watch);
+                PrintTurnAndAction(watch, mahjongPlayers[userInx]);
+                if (mahjongPlayers[userInx].isHuman)
+                {
+                    PressKeyAndAction(ref mahjongPlayers[userInx], watch);                    
+                }
+
+                // 키 입력후에는 한턴 넘어가는것으로 판단한다.
+                mahjongPlayers[userInx].isPlaying = false;
+                mahjongPlayers[nextUserInx].isPlaying = true;
             }
         }
 
@@ -102,7 +111,7 @@ namespace Mahjong
                     {
                         WaitUntilElapsedTime(watch2, waitTimeLong);
                         Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], wantToDistribute, tileIndex);
-                        Players.PrintPlayers(mahjongPlayers);
+                        Games.PrintGames(mahjongPlayers);
                         tileIndex += wantToDistribute;
                     }     
                 }
@@ -113,7 +122,7 @@ namespace Mahjong
                     {
                         WaitUntilElapsedTime(watch2, waitTimeLong);
                         Players.TakeTiles(mahjongTiles, ref mahjongPlayers[j], remainderTiles, tileIndex);
-                        Players.PrintPlayers(mahjongPlayers);
+                        Games.PrintGames(mahjongPlayers);
                         tileIndex += remainderTiles;
                     }
                 }
@@ -135,43 +144,70 @@ namespace Mahjong
             }
         }
 
-        public static void PrintTurnAndAction(Players.Player player)
+        public static void PrintTurnAndAction(Stopwatch watch, Players.Player player)
         {
+            WaitUntilElapsedTime(watch, 1000);
             Console.Write($"{player.name}님의 차례입니다 ");
-            Console.Write("1️⃣ 버리기 ");
-            Console.Write("2️⃣ 리치 ");
-            Console.Write("3️⃣ 쯔모 ");
-            Console.Write("0️⃣ 종료");
-            Console.WriteLine();
+            if (player.isHuman)
+            {
+                Console.Write("1️⃣ 버리기 ");
+                Console.Write("2️⃣ 리치 ");
+                Console.Write("3️⃣ 쯔모 ");
+                Console.Write("4️⃣ 깡 ");
+                Console.Write("0️⃣ 종료");
+                Console.WriteLine();                
+            }
+            else
+            {
+                int computerThinking = 3;
+                long waitTime = 1000;
+                
+                Console.Write("컴퓨터 생각중... ");
+                for (int i = 0; i < computerThinking; i++)
+                {
+                    WaitUntilElapsedTime(watch, waitTime);
+                    Console.Write("🤔");
+                }
+            }
         }
 
         public static void PressKeyAndAction(ref Players.Player player, Stopwatch watch)
         {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            if (keyInfo.Key == ConsoleKey.D1)
-            {
-                Console.WriteLine("버릴 타일을 선택해 주세요");
-                Players.UserAddTempAndDiscardTile(ref player);
-                WaitUntilElapsedTime(watch, 200);
-            }
+            // 기능 구현중 or 잘못된 키 판별 하는 변수
+            bool isFalseKey = true;
+            ConsoleKeyInfo keyInfo;
             
-            if (keyInfo.Key == ConsoleKey.D2)
+            while (isFalseKey)
             {
-                Console.WriteLine("🚜👷리치 구현중....⛏️");
-                WaitUntilElapsedTime(watch, 200);
-            }
-
-            if (keyInfo.Key == ConsoleKey.D3)
-            {
-                Console.WriteLine("🚜👷쯔모 구현중....⛏️");
-                WaitUntilElapsedTime(watch, 200);
-            }
-
-            if (keyInfo.Key == ConsoleKey.D0)
-            {
-                isRunning = false;
-                Console.WriteLine("게임을 종료합니다..👋");
-                WaitUntilElapsedTime(watch, 200);
+                keyInfo = Console.ReadKey(true);
+                if (keyInfo.Key == ConsoleKey.D1)
+                {
+                    isFalseKey = false;
+                    Players.UserAddTempAndDiscardTile(ref player);
+                    WaitUntilElapsedTime(watch, 200);
+                } else if (keyInfo.Key == ConsoleKey.D2)
+                {
+                    Console.WriteLine("🚜👷리치 구현중....⛏️");
+                    WaitUntilElapsedTime(watch, 200);
+                } else if (keyInfo.Key == ConsoleKey.D3)
+                {
+                    Console.WriteLine("🚜👷쯔모 구현중....⛏️");
+                    WaitUntilElapsedTime(watch, 200);
+                } else if (keyInfo.Key == ConsoleKey.D4)
+                {
+                    Console.WriteLine("🚜👷깡 구현중....⛏️");
+                    WaitUntilElapsedTime(watch, 200);                    
+                } else if (keyInfo.Key == ConsoleKey.D0)
+                {
+                    isRunning = false;
+                    isFalseKey = false;
+                    Console.WriteLine("게임을 종료합니다..👋");
+                    WaitUntilElapsedTime(watch, 200);
+                }
+                else
+                {
+                    Console.WriteLine("잘못된 키입니다.");
+                }                
             }
         }
     }

@@ -98,5 +98,42 @@ namespace Mahjong
 
             return playingUserInx;
         }
+        
+        // 일단 임시로 다형성 추가
+        public static void PrintGames(Players.Player[] players)
+        {
+            PrintGames(new Deck.PublicDeck(), players);
+        }        
+        
+        // 게임의 전체 화면 보여주는 메서드
+        public static void PrintGames(Deck.PublicDeck publicDeck, Players.Player[] players)
+        {
+            Console.Clear();
+            PrintHeadInfo();
+            if (publicDeck.publicTiles != null)
+            {
+                PrintDoraTiles(publicDeck);                
+            }
+            Console.WriteLine();
+            foreach (Players.Player p in players)
+            {
+                Players.PrintPlayer(p);
+            }
+        }
+        
+        // 게임 위 정보 화면
+        public static void PrintHeadInfo()
+        {
+            Console.Write("👦\t\t");
+            Console.Write("💯\t\t");
+            Console.Write("💨\t");
+            Console.Write("💭");
+        }
+
+        public static void PrintDoraTiles(Deck.PublicDeck publicDeck)
+        {
+            Console.Write("\t도라 : ");
+            Tiles.PrintDeck(publicDeck.doraTiles);
+        }
     }
 }
