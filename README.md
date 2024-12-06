@@ -1,5 +1,10 @@
 # mahjong_console_project
-C# 콘솔로 구현하는 마작 프로그램
+C# 콘솔로 구현하는 마작 프로그램. 
+아래 내용들도 완성에 따라 업데이트 예정
+
+---
+
+![클래스다이어그램](https://github.com/dduckchul/dduckchul.github.io/blob/gh-pages/docs/assets/img/posting/2024/ClassDiagram1.png?raw=true)
 
 ## Program.cs
 * 프로그램 구동되는 main 메서드 있는 곳입니다.
