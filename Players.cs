@@ -26,6 +26,7 @@ namespace Mahjong
             public Games.Winds wind;
             public Tiles.Tile[] hands;
             public Tiles.Tile[] discards;
+            public Tiles.Tile[,] openedBodies;
             public Tiles.Tile temp;
         }
 

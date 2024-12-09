@@ -143,11 +143,45 @@ namespace Mahjong
             Console.ResetColor();
         }
 
-        public static bool IsNumberTiles(TileType type)
+        // 자패 (풍패나 역패)인지 확인
+        public static bool IsNumberTile(TileType type)
         {
             return (int)type < (int)TileType.Wind;
         }
 
+        // 노두패 (숫자패인데 1이나 9)
+        public static bool IsNumberOneOrNine(Tile tile)
+        {
+            if (!IsNumberTile(tile.type))
+            {
+                return false;
+            }
+            
+            if (tile.tileNumber > 1 && tile.tileNumber < 9)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        // 자패 이거나, 숫자가 1이나 9인 타일
+        public static bool IsYoguTile(Tile tile)
+        {
+            if (!IsNumberTile(tile.type))
+            {
+                return true;
+            }
+            
+            if(IsNumberOneOrNine(tile))
+            {
+                return true;
+            }
+            
+            return false;
+        }
+
+        // 유효한 타일인지 (타일이 Man, 0이면 이상하게 초기화된 타일임)
         public static bool IsValidTile(Tile tile)
         {
             if (tile.type == TileType.Man && tile.tileNumber == 0)

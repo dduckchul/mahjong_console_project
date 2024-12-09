@@ -53,7 +53,7 @@ namespace Mahjong
                         continue;
                     }
                     
-                    if (i == 0 && Tiles.IsNumberTiles(type))
+                    if (i == 0 && Tiles.IsNumberTile(type))
                     {
                         newTiles = MakeTypeTiles(type, true);                        
                     }
@@ -89,7 +89,7 @@ namespace Mahjong
                 tilesMaxInt = 3;
             }
             
-            if (Tiles.IsNumberTiles(type))
+            if (Tiles.IsNumberTile(type))
             {
                 tilesMaxInt = 9;
             }
@@ -104,7 +104,7 @@ namespace Mahjong
             for (int i = 0; i < tilesMaxInt; i++)
             {
                 int tileNum = i;
-                if (Tiles.IsNumberTiles(type))
+                if (Tiles.IsNumberTile(type))
                 {
                     tileNum = i + 1;
                 }
