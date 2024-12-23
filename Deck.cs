@@ -17,6 +17,7 @@ namespace Mahjong
             private Tiles.Tile[] _doraTiles;
             private Tiles.Tile[] _uraDoraTiles;
             private Tiles.Tile[] _yungsangTiles;
+            
             private int _currentTileIndex;
             private int _currentDoraIndex;
 
@@ -32,7 +33,7 @@ namespace Mahjong
                 {
                     foreach (Tiles.Tile t in pileOfTiles)
                     {
-                        if (Tiles.IsValidTile(t))
+                        if (t.IsValidTile())
                         {
                             PublicStack.Push(t);                           
                         }
@@ -76,12 +77,14 @@ namespace Mahjong
                 private set { _currentDoraIndex = value; }
             }
             
-            // 초기 덱 생성
+            // 초기 덱 생성 & 도라 초기화
             public void MakePublicDeck()
             {
+                // 도라는 위에 출력해줘야되니까 isVisible로..
                 for (int i = 0; i < DoraTiles.Length; i++)
                 {
                     DoraTiles[i] = PublicStack.Pop();
+                    DoraTiles[i].IsVisible = true;
                 }
 
                 for (int j = 0; j < UraDoraTiles.Length; j++)
@@ -93,31 +96,70 @@ namespace Mahjong
                 {
                     YungSangTiles[k] = PublicStack.Pop();
                 }
-            }            
+
+                InitDora();
+            }
             
-            // 덱의 도라를 0번으로 초기화하고, 나머지 도라들을 뒤집은 상태로 둔다
-            public void InitDora()
+            public bool IsValidPublicDeck()
+            {
+                if (PublicStack.Count != PublicTiles)
+                {
+                    return false;
+                }
+
+                foreach (Tiles.Tile tile in _doraTiles)
+                {
+                    if (!tile.IsValidTile())
+                    {
+                        return false;
+                    }
+                }
+                
+                foreach (Tiles.Tile tile in _uraDoraTiles)
+                {
+                    if (!tile.IsValidTile())
+                    {
+                        return false;
+                    }
+                }
+
+                foreach (Tiles.Tile tile in _yungsangTiles)
+                {
+                    if (!tile.IsValidTile())
+                    {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            // 덱의 도라를 0번으로 초기화하고, 0번 도라를 연다.
+            private void InitDora()
             {
                 CurrentDoraIndex = 0;
-                int doraInx = CurrentDoraIndex;
-
-                for (int i = 0; i < DoraTiles.Length; i++)
-                {
-                    if (doraInx == i)
-                    {
-                        DoraTiles[i].isShowingFront = true;                    
-                    }
-                    DoraTiles[i].isVisible = true;
-                }
+                OpenDora();
             }
         
             // 도라 타일 더 열어야 할때
             public void OpenDora()
             {
-                int doraInx = CurrentDoraIndex++;
-                DoraTiles[doraInx].isVisible = true;
-                DoraTiles[doraInx].isShowingFront = true;
-            }            
+                DoraTiles[CurrentDoraIndex].IsShowingFront = true;
+                CurrentDoraIndex++;
+            }
+            
+            // 공용 덱에서 하나 타일을 뽑는다.
+            public Tiles.Tile Tsumo()
+            {
+                // 스택에 없음
+                if (PublicStack.Count <= 0 || CurrentTileIndex > PublicTiles)
+                {
+                    Console.WriteLine("쯔모시 뭔가 잘못되었습니다 😱");
+                }
+
+                CurrentTileIndex++;
+                return PublicStack.Pop();
+            }
         }
 
         public class Hands
@@ -160,8 +202,8 @@ namespace Mahjong
                 {
                     for (int j = i + 1; j < MyTiles.Length-1; j++)
                     {
-                        int myTilesType = (int)MyTiles[i].type;
-                        int nextTilesType = (int)MyTiles[j].type;
+                        int myTilesType = (int)MyTiles[i].Type;
+                        int nextTilesType = (int)MyTiles[j].Type;
                         if (myTilesType > nextTilesType)
                         {
                             Tiles.Tile temp = MyTiles[j];
@@ -176,10 +218,10 @@ namespace Mahjong
                 {
                     for (int j = i + 1; j < MyTiles.Length-1; j++)
                     {
-                        int myTileNumber = MyTiles[i].tileNumber;
-                        int nextTileNumber = MyTiles[j].tileNumber;
-                        int myTilesType = (int)MyTiles[i].type;
-                        int nextTilesType = (int)MyTiles[j].type;
+                        int myTileNumber = MyTiles[i].Number;
+                        int nextTileNumber = MyTiles[j].Number;
+                        int myTilesType = (int)MyTiles[i].Type;
+                        int nextTilesType = (int)MyTiles[j].Type;
 
                         if (myTilesType != nextTilesType)
                         {
@@ -202,11 +244,11 @@ namespace Mahjong
         {
             Tiles.Tile[] tiles = new Tiles.Tile[MaxMahjongTiles];
 
-            int tileMultiplyNum = 4;
+            int multiplyNum = 4;
             int numberToMakeType = (int)Tiles.TileType.End;
             int prevTilesNum = 0;
             
-            for (int i = 0; i < tileMultiplyNum; i++)
+            for (int i = 0; i < multiplyNum; i++)
             {
                 for (int j = 0; j < numberToMakeType; j++)
                 {
@@ -214,7 +256,6 @@ namespace Mahjong
                     Tiles.TileType type;
                     
                     bool isSomethingParsed = Enum.TryParse(j.ToString(), out type);
-                    
                     if (!isSomethingParsed)
                     {
                         Console.WriteLine("뭔가가 잘못되었습니다.. 확인해주세요");
@@ -222,7 +263,7 @@ namespace Mahjong
                         continue;
                     }
                     
-                    if (i == 0 && Tiles.IsNumberTile(type))
+                    if (i == 0 && Tiles.IsNumberType(type))
                     {
                         newTiles = MakeTypeTiles(type, true);                        
                     }
@@ -258,7 +299,7 @@ namespace Mahjong
                 tilesMaxInt = 3;
             }
             
-            if (Tiles.IsNumberTile(type))
+            if (Tiles.IsNumberType(type))
             {
                 tilesMaxInt = 9;
             }
@@ -273,18 +314,16 @@ namespace Mahjong
             for (int i = 0; i < tilesMaxInt; i++)
             {
                 int tileNum = i;
-                if (Tiles.IsNumberTile(type))
+                bool makeDora = false;
+                if (Tiles.IsNumberType(type))
                 {
                     tileNum = i + 1;
                 }
-                Tiles.Tile tile = new Tiles.Tile();
-                tile.type = type;
-                tile.tileNumber = tileNum;
                 if (tileNum == 5 && makeRedDora)
                 {
-                    tile.isDora = true;
+                    makeDora = true;
                 }
-                tiles[i] = tile;
+                tiles[i] = new Tiles.Tile(type, tileNum, makeDora);
             }
 
             return tiles;

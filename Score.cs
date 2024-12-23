@@ -1,4 +1,4 @@
-namespace Mahjong.Properties
+namespace Mahjong
 {
     public class Score
     {

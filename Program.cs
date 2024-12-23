@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Security.Cryptography;
+﻿using System.Diagnostics;
 
 namespace Mahjong
 {
@@ -24,9 +22,11 @@ namespace Mahjong
 
         public static void Main(string[] args)
         {
-            // 게임 초기화. 동풍전 1국 1번장부터 시작, 유저와 덱 모두 초기화
-            Game game = new Game();
             IsRunning = true;
+            
+            // 게임 초기화. 동풍전 1국 1번장부터 시작, 동풍전 이상 하고싶으면 Size 늘리기
+            // 게임 생성시 유저도 같이 초기화
+            Game game = new Game(4);
             
             // 게임 기억하기
             Stats stats = new Stats();
@@ -40,7 +40,7 @@ namespace Mahjong
                 while (IsRunning && game.IsGameContinue)
                 {
                     // 게임 초기화
-                    game.InitGame();
+                    game.InitGame(true);
                     game.FindFirstUser();
                     game.Set++;
                     game.IsSetContinue = true;

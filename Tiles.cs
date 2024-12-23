@@ -10,43 +10,89 @@ namespace Mahjong
         }
         public enum Winds
         {
-            East,South,West,North,End
+            East,South,West,North
         }
         public enum Words
         {
-            Blank,Start,Middle,End
+            Blank,Start,Middle
         }
         public struct Tile
         {
-            public TileType type;
-            public int tileNumber;
-            public bool isDora;
-            public bool isShowingFront;
-            public bool isVisible;
-        }
+            private readonly TileType _type;
+            private readonly int _number;
+            private readonly bool _isDora;
 
-        public static void PrintTile(Tile tile)
-        {
-            if (!tile.isVisible)
+            public TileType Type
             {
-                return;
-            }
-            
-            if (!tile.isShowingFront)
-            {
-                Console.Write("🀫");
-                Console.Write(" ");
-                return;
-            }
-            
-            if (tile.isDora)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
+                get { return _type; }
             }
 
-            if (tile.type == TileType.Man)
+            public int Number
             {
-                switch (tile.tileNumber)
+                get { return _number; }
+            }
+
+            public bool IsDora
+            {
+                get { return _isDora; }
+            }
+
+            public bool IsShowingFront
+            {
+                get;
+                set;
+            }
+
+            public bool IsVisible
+            {
+                get;
+                set;
+            }
+
+            public Tile(TileType type, int number, bool isDora)
+            {
+                _type = type;
+                _number = number;
+                _isDora = isDora;
+                IsShowingFront = false;
+                IsVisible = false;
+            }
+            
+            public void PrintTile()
+            {
+                if (!IsVisible) { return; }
+                if (!IsShowingFront)
+                {
+                    Console.Write("🀫 ");
+                    return;
+                }
+                
+                if (IsDora)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+
+                if (Type == TileType.Man) { PrintMan(); }
+                if (Type == TileType.Sak) { PrintSak(); }
+                if (Type == TileType.Tong) { PrintTong(); }
+                if (Type == TileType.Wind) { PrintWind(); }
+                if (Type == TileType.Word) { PrintWord(); }
+
+                // 중 타일 하나 띄고 나오는거 거슬려서 예외처리
+                if (!(Type == TileType.Word && Number == (int)Words.Middle))
+                {
+                    Console.Write(" ");
+                }
+                
+                if (IsDora)
+                {
+                    Console.ResetColor();                
+                }
+            }
+
+            private void PrintMan()
+            {
+                switch (Number)
                 {
                     case 1 : Console.Write("🀇"); break;
                     case 2 : Console.Write("🀈"); break;
@@ -58,11 +104,12 @@ namespace Mahjong
                     case 8 : Console.Write("🀎"); break;
                     case 9 : Console.Write("🀏"); break;
                     default: Console.Write("😱"); break;
-                } 
+                }
             }
-            if (tile.type == TileType.Sak)
+
+            private void PrintSak()
             {
-                switch (tile.tileNumber)
+                switch (Number)
                 {
                     case 1 : Console.Write("🀐"); break;
                     case 2 : Console.Write("🀑"); break;
@@ -74,11 +121,12 @@ namespace Mahjong
                     case 8 : Console.Write("🀗"); break;
                     case 9 : Console.Write("🀘"); break;
                     default: Console.Write("😱"); break;
-                } 
+                }
             }
-            if (tile.type == TileType.Tong)
+
+            private void PrintTong()
             {
-                switch (tile.tileNumber)
+                switch (Number)
                 {
                     case 1 : Console.Write("🀙"); break;
                     case 2 : Console.Write("🀚"); break;
@@ -90,106 +138,86 @@ namespace Mahjong
                     case 8 : Console.Write("🀠"); break;
                     case 9 : Console.Write("🀡"); break;
                     default: Console.Write("😱"); break;
-                } 
+                }
             }
-            if (tile.type == TileType.Wind)
+
+            private void PrintWind()
             {
-                switch (tile.tileNumber)
+                switch (Number)
                 {
                     case (int)Winds.East : Console.Write("🀀"); break;
                     case (int)Winds.South : Console.Write("🀁"); break;
                     case (int)Winds.West : Console.Write("🀂"); break;
                     case (int)Winds.North : Console.Write("🀃"); break;
                     default: Console.Write("😱"); break;                    
-                }
+                }                
             }
-            if (tile.type == TileType.Word)
+
+            private void PrintWord()
             {
-                switch (tile.tileNumber)
+                switch (Number)
                 {
                     case (int)Words.Blank : Console.Write("🀆"); break;
                     case (int)Words.Start : Console.Write("🀅"); break;
                     case (int)Words.Middle : Console.Write("🀄︎"); break;
                     default: Console.Write("😱"); break;
-                }
-            }
-
-            // 중 타일 하나 띄고 나오는거 거슬려서 예외처리
-            if (!(tile.type == TileType.Word && tile.tileNumber == (int)Words.Middle))
-            {
-                Console.Write(" ");
+                }                
             }
             
-            // 도라 색상 변경 후 리셋 버그 예외 처리
-            if (Console.BackgroundColor == ConsoleColor.DarkGreen && tile.isDora)
+            // 노두패 (숫자패인데 1이나 9)
+            public bool IsNumberOneOrNine()
             {
-                Console.ResetColor();
-                // Console.BackgroundColor = ConsoleColor.DarkGreen;
+                if (!IsNumberTile())
+                {
+                    return false;
+                }
+            
+                return Number == 1 || Number == 9;
             }
-            else if (tile.isDora)
+            
+            // 자패 (풍패나 역패)인지 확인
+            public bool IsNumberTile()
             {
-                Console.ResetColor();                
+                return (int)Type < (int)TileType.Wind;
             }
-        }
+            
+            // 자패 이거나, 숫자가 1이나 9인 타일
+            public bool IsYoguTile()
+            {
+                if (!IsNumberTile())
+                {
+                    return true;
+                }
+            
+                return IsNumberOneOrNine();
+            }
+            
+            // 유효한 타일인지 (타일이 Man, 0이면 이상하게 초기화된 타일임)
+            public bool IsValidTile()
+            {
+                if (Type == TileType.Man && Number == 0)
+                {
+                    return false;
+                }
 
-        // To-Do 마지막 버린 타일을 색 변경해서 보여주고싶다
-        public static void PrintDeck(Tile[] tiles)
-        {
-            // Console.BackgroundColor = ConsoleColor.DarkGreen;
-            for (int i = 0; i < tiles.Length; i++)
-            {
-                PrintTile(tiles[i]);
-            }
-            Console.ResetColor();
+                return true;
+            }            
         }
-
-        // 자패 (풍패나 역패)인지 확인
-        public static bool IsNumberTile(TileType type)
+        
+        // 해당 타입이 숫자 타일인지 체크하는 유틸 메서드
+        public static bool IsNumberType(TileType type)
         {
             return (int)type < (int)TileType.Wind;
         }
-
-        // 노두패 (숫자패인데 1이나 9)
-        public static bool IsNumberOneOrNine(Tile tile)
+        
+        // To-Do 마지막 버린 타일을 색 변경해서 보여주고싶다
+        public static void PrintDeck(Tile[] tiles)
         {
-            if (!IsNumberTile(tile.type))
+            for (int i = 0; i < tiles.Length; i++)
             {
-                return false;
+                tiles[i].PrintTile();
             }
-            
-            if (tile.tileNumber > 1 && tile.tileNumber < 9)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        // 자패 이거나, 숫자가 1이나 9인 타일
-        public static bool IsYoguTile(Tile tile)
-        {
-            if (!IsNumberTile(tile.type))
-            {
-                return true;
-            }
-            
-            if(IsNumberOneOrNine(tile))
-            {
-                return true;
-            }
-            
-            return false;
-        }
-
-        // 유효한 타일인지 (타일이 Man, 0이면 이상하게 초기화된 타일임)
-        public static bool IsValidTile(Tile tile)
-        {
-            if (tile.type == TileType.Man && tile.tileNumber == 0)
-            {
-                return false;
-            }
-
-            return true;
+            Console.ResetColor();
         }
     }
 }
