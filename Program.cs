@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Mahjong
 {
@@ -8,18 +9,11 @@ namespace Mahjong
         // 다른곳과 같이 쓸 StopWatch 클래스
         private static Stopwatch _stopwatch;
         private static bool _isRunning;
-        // Game 클래스로 바꿀거임
-        private List<Game> _games;
-
+        
         public static bool IsRunning
         {
             get { return _isRunning;}
             set { _isRunning = value; }
-        }
-
-        public List<Game> Games
-        {
-            get { return _games; }
         }
 
         public static Stopwatch Watch
@@ -28,21 +22,16 @@ namespace Mahjong
             private set { _stopwatch = value; }
         }
 
-        private List<Game> gamesList;
-
-        public Program()
-        {
-            _isRunning = true;
-            _games = new List<Game>();
-            _stopwatch = new Stopwatch();
-        }
-
         public static void Main(string[] args)
         {
             // 게임 초기화. 동풍전 1국 1번장부터 시작, 유저와 덱 모두 초기화
             Game game = new Game();
-            game.InitGame();
-
+            IsRunning = true;
+            
+            // 게임 기억하기
+            Stats stats = new Stats();
+            stats.Games.Add(game);
+            
             // 게임 진짜 시작
             while (IsRunning)
             {

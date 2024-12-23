@@ -46,6 +46,7 @@
         <Compile Include="Program.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Score.cs" />
+        <Compile Include="Stats.cs" />
         <Compile Include="Tiles.cs" />
         <Compile Include="Yaku.cs" />
     </ItemGroup>

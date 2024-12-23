@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Mahjong
@@ -68,7 +69,6 @@ namespace Mahjong
             get { return _isSetContinue; }
             set { _isSetContinue = value; }
         }
-
         
         // 유국 될때 때의 조건 4개만 하자...
         // 1. 패를 다 쓴다
@@ -77,9 +77,8 @@ namespace Mahjong
         // 4. 한 세트에서 깡이 네번 나왔을때 (깡 구현시 구현)
         public bool IsDrawGame()
         {
-            Stopwatch watch = new Stopwatch();
             // 1. 패를 다 쓴다.
-            if (PublicDeck.currentTileIndex == Deck.PublicTiles)
+            if (PublicDeck.PublicStack.Count == 0)
             {
                 Program.WaitUntilElapsedTime(1000);
                 Console.WriteLine("\n🚫패가 소진 되었습니다.. 유국!!🚫");
@@ -87,24 +86,24 @@ namespace Mahjong
             }
 
             // 2. 사풍연타. 4번째 턴에만 나오는 무승부, 4턴째인지 확인
-            if (PublicDeck.currentTileIndex == 3)
+            if (PublicDeck.CurrentTileIndex == 3)
             {
                 // 1번은 뛰어넘고 비교
-                Tiles.TileType tempType = Players[0].Discards[0].type;
+                Tiles.TileType tempType = Players[0].Hands.Discards[0].type;
                 for (int i = 1; i < Players.Length; i++)
                 {
                     // 바람 타입 아니면 사풍연타 아님
-                    if (Players[i].Discards[0].type != Tiles.TileType.Wind)
+                    if (Players[i].Hands.Discards[0].type != Tiles.TileType.Wind)
                     {
                         break;
                     }
                     // 이전과 지금 둘다 비교해서 바람 아니면 break;
-                    if (Players[i].Discards[0].type != tempType)
+                    if (Players[i].Hands.Discards[0].type != tempType)
                     {
                         break;
                     }
                     // 임시 변수에 이전 타일 기억해둔다
-                    tempType = Players[i].Discards[0].type;
+                    tempType = Players[i].Hands.Discards[0].type;
 
                     // 끝까지 비교 (넷다 바람타일이다) -> 무승부
                     if (i == 3)
@@ -119,7 +118,7 @@ namespace Mahjong
             return false;
         }        
         
-        public bool validateWindContinue()
+        public bool ValidateWindContinue()
         {
             int playerMaxScore = 0;
             int currentGamePassed = ((int)Wind + 1) * Num;
@@ -203,10 +202,10 @@ namespace Mahjong
                 PrintGameInfo();                
             }
             PrintHeadInfo();
-            if (PublicDeck.publicTiles != null)
+            if (PublicDeck.PublicStack != null)
             {
-                PrintDoraTiles(PublicDeck);
-                PrintLeftTiles(PublicDeck);
+                PrintDoraTiles();
+                PrintLeftTiles();
             }
             Console.WriteLine();
             foreach (Player p in Players)
@@ -251,21 +250,28 @@ namespace Mahjong
             Console.Write("💭");
         }
 
-        public static void PrintDoraTiles(Deck.PublicDeck publicDeck)
+        public void PrintDoraTiles()
         {
             Console.Write("  도라 : ");
-            Tiles.PrintDeck(publicDeck.doraTiles);
+            Tiles.PrintDeck(PublicDeck.DoraTiles);
         }
 
-        public static void PrintLeftTiles(Deck.PublicDeck publicDeck)
+        public void PrintLeftTiles()
         {
-            int leftTiles = Deck.PublicTiles - publicDeck.currentTileIndex;
-
+            int leftTiles = PublicDeck.PublicStack.Count;
+            int hund = leftTiles / 100;
             int ten = leftTiles / 10 % 10;
             int one = leftTiles % 10;
 
-            string leftStr = "  🀫 ✖️ " + Program.ReturnIntToEmoji(ten) + " " + Program.ReturnIntToEmoji(one);
-            Console.Write(leftStr);            
+            Console.Write("  🀫 ✖️ ");
+            
+            if (hund > 0)
+            {
+                Console.Write(Program.ReturnIntToEmoji(hund) + " ");
+            }
+            
+            Console.Write(Program.ReturnIntToEmoji(ten) + " ");
+            Console.Write(Program.ReturnIntToEmoji(one));
         }
 
         public void InitGame()
@@ -275,54 +281,48 @@ namespace Mahjong
             IsGameContinue = true;
             IsSetContinue = true;
             
-            Player player = new Player();
             // 게임 시작, 플레이어 초기화
-            Players = player.InitPlayers();
+            Players = Player.InitPlayers();
             
-            // 덱 초기화
+            // 마작 덱 셔플 & 공용 덱 초기화
             Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
-            // 마작 패 초기화 잘 됐는지 출력
-            // Tiles.PrintDeck(pilesOfTile);
-            
-            // 마작 덱 셔플
             Deck.ShuffleDeck(pilesOfTile);
+            PublicDeck = new Deck.PublicDeck(pilesOfTile);
+
             // 마작 패 셔플 잘 됐는지 출력
-            // tiles.PrintDeck(pilesOfTile);
+            // Tiles.PrintDeck(PublicDeck.PublicStack.ToArray());
             
             // 플레이어에게 패 나눠주기
-            InitPlayersHand(pilesOfTile);
+            InitPlayersHand(PublicDeck.PublicStack);
             
             // 공용 덱 구성하고 도라 타일 1개 열기
-            Deck.PublicDeck publicDeck = Deck.MakePublicDeck(pilesOfTile);
-            PublicDeck = publicDeck;
-            Deck.initDora(ref publicDeck);
+            PublicDeck.MakePublicDeck();
+            PublicDeck.InitDora();
             // publicDeck 구성 잘 되었는지 확인
             // Console.WriteLine(publicDeck);
             
             // 각 플레이어 손패 정렬
             foreach (Player pl in Players)
             {
-                Deck.SortMyHand(pl);
+                pl.Hands.SortMyHand();
              }
             PrintGames();            
         }
         
-        public void InitPlayersHand(Tiles.Tile[] mahjongTiles)
+        public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
         {
             // 핸드 new 로 초기화
             for (int i = 0; i < Players.Length; i++)
             {
-                Players[i].Hands = new Tiles.Tile[Mahjong.Player.MaxHandTiles];
-                Players[i].Discards = new Tiles.Tile[Mahjong.Player.MaxDiscardTiles];                
+                Players[i].Hands.MyTiles = new Tiles.Tile[Player.MaxHandTiles];
+                Players[i].Hands.Discards = new Tiles.Tile[Player.MaxDiscardTiles];                
             }
             
-            // 현재 분배중인 덱 인덱스
-            int tileIndex = 0;
             int distributeTimes = 3;
             // 처음은 핸드 최대값 -1 만큼 분배, 분배를 n번으로 쪼개고싶다
-            int wantToDistribute = (Mahjong.Player.MaxHandTiles-1) / distributeTimes;
+            int wantToDistribute = (Player.MaxHandTiles-1) / distributeTimes;
             // 마지막 for-loop 에서 줘야하는 타일값
-            int remainderTiles = (Mahjong.Player.MaxHandTiles-1) % distributeTimes;
+            int remainderTiles = (Player.MaxHandTiles-1) % distributeTimes;
             
             // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
             long waitTimeLong = 100;            
@@ -336,9 +336,8 @@ namespace Mahjong
                     for (int j = 0; j < Players.Length; j++)
                     {
                         Program.WaitUntilElapsedTime(waitTimeLong);
-                        Players[i].TakeTiles(mahjongTiles,wantToDistribute, tileIndex);
+                        Players[j].TakeTiles(publicStack,wantToDistribute);
                         PrintGames();
-                        tileIndex += wantToDistribute;
                     }     
                 }
                 // 마지막 반복에서는 나머지 타일만 준다
@@ -347,9 +346,8 @@ namespace Mahjong
                     for (int j = 0; j < Players.Length; j++)
                     {
                         Program.WaitUntilElapsedTime(waitTimeLong);
-                        Players[i].TakeTiles(mahjongTiles,remainderTiles, tileIndex);
+                        Players[j].TakeTiles(publicStack,remainderTiles);
                         PrintGames();
-                        tileIndex += remainderTiles;
                     }
                 }
             }         
@@ -359,7 +357,6 @@ namespace Mahjong
         {
             int userInx = FindPlayingUserInx(Players);
             int nextUserInx = FindNextUserInx();
-            
             Player currentPlayer = Players[userInx];
 
             // 나부터 하나씩 뽑자
@@ -371,7 +368,7 @@ namespace Mahjong
             {
                 tile.isShowingFront = true;
             }
-            currentPlayer.Temp = tile;
+            currentPlayer.Hands.Temp = tile;
 
             Program.WaitUntilElapsedTime(500);
             PrintGames();

@@ -117,7 +117,7 @@ namespace Mahjong
             // 중 타일 하나 띄고 나오는거 거슬려서 예외처리
             if (!(tile.type == TileType.Word && tile.tileNumber == (int)Words.Middle))
             {
-                Console.Write(" ");                
+                Console.Write(" ");
             }
             
             // 도라 색상 변경 후 리셋 버그 예외 처리
