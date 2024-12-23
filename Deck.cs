@@ -5,7 +5,6 @@ namespace Mahjong
     public class Deck
     {
         public const int DistributedTiles = 52;
-
         public const int PublicTiles = 70;
         public const int DoraTiles = 5;
         public const int UraDoraTiles = 5;
@@ -173,9 +172,9 @@ namespace Mahjong
 
         // 1. Sort By Type,
         // 2. Sort By Number
-        public static void SortMyHand(Players.Player player)
+        public static void SortMyHand(Player p)
         {
-            Tiles.Tile[] myHands = player.hands;
+            Tiles.Tile[] myHands = p.Hands;
             // 단순하게 하면.. Type 으로 정렬, Number 로 정렬 이중포문 두번
             for (int i = 0; i < myHands.Length-1; i++)
             {
