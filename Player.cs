@@ -115,11 +115,6 @@ namespace Mahjong
         // 따로 넘버로 나눈 이유는 뿌려주는거 애니메이션처럼 할려고 ㅎㅎㅎㅎㅎㅎㅎ..
         public void TakeTiles(Stack<Tiles.Tile> publicStack, int number)
         {
-            if (Hands == null)
-            {
-                Hands = new Deck.Hands();
-            }
-
             // 1개씩 더미에서 내 핸드로 가져오기            
             for (int i = 0; i < number; i++)
             {
@@ -127,15 +122,14 @@ namespace Mahjong
                 Tiles.Tile tile = publicStack.Pop();
                 for (int j = 0; j < Hands.MyTiles.Length; j++)
                 {
-                    tile.isVisible = true;
-                    
+                    tile.IsVisible = true;
                     if (IsHuman)
                     {
-                        tile.isShowingFront = true;
+                        tile.IsShowingFront = true;
                     }
                     
                     // 비어있는거 확인하려고 숫자 비교했는데 여기서 이상해짐
-                    if (Tiles.IsValidTile(Hands.MyTiles[j]) == false)
+                    if (Hands.MyTiles[j].IsValidTile() == false)
                     {
                         Hands.MyTiles[j] = tile;
                         break;
@@ -208,11 +202,10 @@ namespace Mahjong
 
         private void PrintPlayerTemp()
         {
-            if (Tiles.IsValidTile(Hands.Temp))
+            if (Hands.Temp.IsValidTile())
             {
                 Console.Write("\t\t");
-                // Console.BackgroundColor = ConsoleColor.DarkGreen;
-                Tiles.PrintTile(Hands.Temp);
+                Hands.Temp.PrintTile();
                 Console.ResetColor();
                 Console.Write("🤏");                
             }
@@ -222,17 +215,6 @@ namespace Mahjong
         {
             Console.Write("🗑️\t:\t");
             Tiles.PrintDeck(Hands.Discards);
-        }
-        
-        // 공용 덱에서 하나 타일을 뽑는다.
-        public Tiles.Tile Tsumo(Deck.PublicDeck publicDeck)
-        {
-            if (publicDeck.CurrentTileIndex < 0 || publicDeck.CurrentTileIndex > Deck.MaxMahjongTiles)
-            {
-                Console.WriteLine("쯔모시 뭔가 잘못되었습니다 😱");
-            }
-            
-            return publicDeck.PublicStack.Pop();
         }
 
         public void UserAddTempAndDiscardTile()
@@ -256,14 +238,12 @@ namespace Mahjong
             while (!parseResult)
             {
                 keyInfo = Console.ReadKey();
-                char key = keyInfo.KeyChar;
-                parseResult = int.TryParse(key.ToString(), 
+                parseResult = int.TryParse(keyInfo.KeyChar.ToString(), 
                     NumberStyles.HexNumber, CultureInfo.CurrentCulture, out keyInt);
                 if (parseResult)
                 {
-                    Program.WaitUntilElapsedTime(200);
+                    Program.WaitUntilElapsedTime(100);
                     Console.WriteLine(" 선택한 숫자 : " + keyInt);
-                    break;
                 }
                 else
                 {
@@ -289,7 +269,7 @@ namespace Mahjong
         public void DiscardTile(int keyInt)
         {
             Tiles.Tile discard = Hands.MyTiles[keyInt];
-            discard.isShowingFront = true;
+            discard.IsShowingFront = true;
             Hands.MyTiles[keyInt] = Hands.Temp;
             Hands.MyTiles[MaxHandTiles - 1] = new Tiles.Tile();
 
@@ -304,7 +284,7 @@ namespace Mahjong
         {
             for (int i = 0; i < Hands.Discards.Length; i++)
             {
-                if (!Tiles.IsValidTile(Hands.Discards[i]))
+                if (!Hands.Discards[i].IsValidTile())
                 {
                     return i;
                 }
