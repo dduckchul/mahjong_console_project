@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace Mahjong
 {
-    public class Player
+    public class Player : IEquatable<Player>
     {
         // 마작 기본 점수
         public const int DefaultScore = 25000;
@@ -335,6 +335,31 @@ namespace Mahjong
         public void ComputerAction()
         {
             AiAddTempAndDiscardTile();
-        }                
+        }
+
+        // C# equals 재정의
+        // https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type
+        public bool Equals(Player other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            // 타입 비교
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+            
+            // 주소값 비교
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            // 이름과 휴먼인지만 같으면 같은 사람으로 치자
+            return Name == other.Name && IsHuman == other.IsHuman;
+        }
     }
 }
