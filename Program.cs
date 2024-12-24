@@ -33,7 +33,7 @@ namespace Mahjong
             stats.Games.Add(game);
             
             // 게임 진짜 시작
-            while (IsRunning)
+            while (IsRunning && game.ValidateWindContinue())
             {
                 game.StartGame();
                 while (IsRunning && game.IsGameContinue)

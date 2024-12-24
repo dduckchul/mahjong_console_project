@@ -193,7 +193,7 @@ namespace Mahjong
             // 1. 게임이 4 만큼 진행되고 (maxGameSize)
             // 2. 유저중 누군가 30000점이 넘었을 경우 게임 종료
             // 아니면 계속 연장전 처럼 진행~~
-            if (playerMaxScore >= GameEndScore && currentGamePassed > GameSize)
+            if (playerMaxScore >= GameEndScore && currentGamePassed >= GameSize)
             {
                 return false;
             }
