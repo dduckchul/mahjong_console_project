@@ -9,11 +9,9 @@ namespace Mahjong
         {
             East,South,West,North
         }
-
-        // 게임 최종 결과에 이긴 사람 설정
-        public const Player Winner = null;        
+        
         public const int GameEndScore = 30000;
-
+        
         private int _gameSize;        
         // 현재 N번째 국인지 확인
         private int _num;
@@ -295,6 +293,10 @@ namespace Mahjong
         public void PlayingSet()
         {
             Player player = Turns.StartCurrentTurn();
+
+            // 턴 뺏어버리기 예제
+            // Turns.FindAndSetCurrent(me);
+            // player = Turns.CurrentPlayer.Value;
 
             // 나부터 하나씩 뽑자
             Tiles.Tile tile = PublicDeck.Tsumo();

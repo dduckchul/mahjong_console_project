@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Mahjong
@@ -27,7 +28,7 @@ namespace Mahjong
             PlayerList = new LinkedList<Player>();
             foreach (Player p in players)
             {
-                PlayerList.AddFirst(p);
+                PlayerList.AddLast(p);
             }
         }
 
@@ -62,6 +63,29 @@ namespace Mahjong
             {
                 CurrentPlayer = CurrentPlayer.NextOrFirst();
             }
+        }
+
+        public Player FindAndSetCurrent(Player player)
+        {
+            if (player == null)
+            {
+                Console.WriteLine("전달된 플레이어가 없습니다.. 뭔가 잘못되었슴");
+                return null;
+            }
+            
+            LinkedListNode<Player> pNode = PlayerList.Find(player);
+            
+            if (pNode == null || pNode.Value == null)
+            {
+                Console.WriteLine("플레이어가 없습니다.. 뭔가 잘못되었슴");
+                return null;
+            }
+
+            pNode.Value.IsPlaying = true;
+            CurrentPlayer.Value.IsPlaying = false;
+            CurrentPlayer = pNode;
+
+            return pNode.Value;
         }
     }
 }

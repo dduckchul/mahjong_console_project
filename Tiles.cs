@@ -16,7 +16,7 @@ namespace Mahjong
         {
             Blank,Start,Middle
         }
-        public struct Tile
+        public struct Tile : IEquatable<Tile>
         {
             private readonly TileType _type;
             private readonly int _number;
@@ -201,7 +201,13 @@ namespace Mahjong
                 }
 
                 return true;
-            }            
+            }
+
+            // Tiles Equals 재정의, 타입과 넘버만 비교
+            public bool Equals(Tile other)
+            {
+                return Type == other.Type && Number == other.Number;
+            }
         }
         
         // 해당 타입이 숫자 타일인지 체크하는 유틸 메서드
