@@ -3,11 +3,11 @@ namespace Mahjong
     public class Yaku
     {
 
-        public bool IsDeckHasHead(Tiles.Tile[] tiles)
+        public bool IsDeckHasHead(Deck.Hands hands)
         {
-            for (int i = 0; i < tiles.Length -1 ; i++)
+            for (int i = 0; i < hands.MyTiles.Length -1 ; i++)
             {
-                if (tiles[i].Number == tiles[i + 1].Number)
+                if (hands.MyTiles[i].Number == hands.MyTiles[i + 1].Number)
                 {
                     return true;
                 }
@@ -15,12 +15,12 @@ namespace Mahjong
             return false;
         }
 
-        public bool IsDeckHasBody(Tiles.Tile[] tiles)
+        public bool IsDeckHasBody(Deck.Hands hands)
         {
             return false;
         }
         
-        public int CountBodies(Tiles.Tile[] tiles)
+        public int CountBodies(Deck.Hands hands)
         {
             return 0;
         }
@@ -28,8 +28,8 @@ namespace Mahjong
         // 텐파이 조건..? 헤드가 0개이거나, 몸통이 4개 or 헤드가 1개, 몸통이 3개
         public bool IsTenpai(Player p)
         {
-            bool hasHead = IsDeckHasHead(p.Hands.MyTiles);
-            int bodies = CountBodies(p.Hands.MyTiles);
+            bool hasHead = IsDeckHasHead(p.Hands);
+            int bodies = CountBodies(p.Hands);
 
             if (hasHead && bodies == 3 || hasHead == false && bodies == 4)
             {

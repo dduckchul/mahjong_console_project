@@ -83,6 +83,6 @@ namespace Mahjong
                 case 9: return "9️⃣";                
                 default: return "😱";
             }
-        }        
+        }
     }
 }

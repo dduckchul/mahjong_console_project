@@ -297,8 +297,7 @@ namespace Mahjong
             // 턴 뺏어버리기 예제
             // Turns.FindAndSetCurrent(me);
             // player = Turns.CurrentPlayer.Value;
-
-            // 나부터 하나씩 뽑자
+            
             Tiles.Tile tile = PublicDeck.Tsumo();
 
             // 내가 뽑았으면 보이게끔
