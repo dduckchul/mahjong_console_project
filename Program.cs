@@ -56,7 +56,7 @@ namespace Mahjong
                     while (IsRunning && game.IsSetContinue)
                     {
                         game.PlayingSet();
-                    }                    
+                    }
                 }
             }
         }

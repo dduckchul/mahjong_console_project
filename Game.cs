@@ -131,8 +131,9 @@ namespace Mahjong
             // 1. 패를 다 쓴다.
             if (PublicDeck.PublicStack.Count == 0)
             {
-                Program.WaitUntilElapsedTime(1000);
+                Program.WaitUntilElapsedTime(500);
                 Console.WriteLine("\n🚫패가 소진 되었습니다.. 유국!!🚫");
+                Program.WaitUntilElapsedTime(500);
                 return true;
             }
 
@@ -159,8 +160,9 @@ namespace Mahjong
                     // 끝까지 비교 (넷다 바람타일이다) -> 무승부
                     if (i == 3)
                     {
-                        Program.WaitUntilElapsedTime(1000);
+                        Program.WaitUntilElapsedTime(500);
                         Console.WriteLine("🀀 🀁 🀂 🀃 사 풍 연 타 유 국!! 🀀 🀁 🀂 🀃");
+                        Program.WaitUntilElapsedTime(500);
                         return true;
                     }
                 }
@@ -226,25 +228,6 @@ namespace Mahjong
             
             PrintGames();
         }
-
-        private void DebugGame(bool isDebug, Tiles.Tile[] pilesOfTile)
-        {
-            // 디버그 아니면 탈출
-            if (!isDebug) { return; }
-            // 초기화 덱 나오는지 검증
-            Tiles.PrintDeck(pilesOfTile);
-            // 마작 패 셔플 잘 됐는지 출력
-            Tiles.PrintDeck(PublicDeck.PublicStack.ToArray());
-            
-            if (PublicDeck.IsValidPublicDeck())
-            {
-                Console.WriteLine("정상적으로 생성");
-            }
-            else
-            {
-                Console.WriteLine("이상한 덱 생성 확인해 주세요");
-            }
-        }
         
         public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
         {
@@ -262,7 +245,7 @@ namespace Mahjong
             int remainderTiles = (Player.MaxHandTiles-1) % distributeTimes;
             
             // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
-            long waitTimeLong = 100;            
+            long waitTimeLong = 200;            
             
             // 반복해서 13개 타일을 n번 분배하는 기능
             for (int i = 0; i < distributeTimes + 1; i++)
@@ -290,6 +273,8 @@ namespace Mahjong
             }         
         }
         
+        // 한턴마다 진행하는 플레이어의 액션들
+        // 1. 공용 덱에서 파일 뽑기 -> 출력 -> 플레이어 액션 -> 턴종료
         public void PlayingSet()
         {
             Player player = Turns.StartCurrentTurn();
@@ -298,10 +283,9 @@ namespace Mahjong
             // player = Turns.CurrentPlayer.Value;
             
             Tiles.Tile tile = PublicDeck.Tsumo();
-            Program.WaitUntilElapsedTime(500);
+            (player as IAction)?.AddTemp(tile);
             PrintGames();
-
-            (player as IAction)?.Action(tile);
+            (player as IAction)?.Action();
             
             Turns.EndCurrentTurn();
             
@@ -392,6 +376,25 @@ namespace Mahjong
             
             Console.Write(Program.ReturnIntToEmoji(ten) + " ");
             Console.Write(Program.ReturnIntToEmoji(one));
+        }
+        
+        private void DebugGame(bool isDebug, Tiles.Tile[] pilesOfTile)
+        {
+            // 디버그 아니면 탈출
+            if (!isDebug) { return; }
+            // 초기화 덱 나오는지 검증
+            Tiles.PrintDeck(pilesOfTile);
+            // 마작 패 셔플 잘 됐는지 출력
+            Tiles.PrintDeck(PublicDeck.PublicStack.ToArray());
+            
+            if (PublicDeck.IsValidPublicDeck())
+            {
+                Console.WriteLine("정상적으로 생성");
+            }
+            else
+            {
+                Console.WriteLine("이상한 덱 생성 확인해 주세요");
+            }
         }        
     }
 }

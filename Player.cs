@@ -253,7 +253,7 @@ namespace Mahjong
         // 핸드에 temp 더하기
         public void PrintTurn()
         {
-            Program.WaitUntilElapsedTime(300);
+            Program.WaitUntilElapsedTime(500);
             Console.Write($"{Name}님의 순서! ");
             Console.Write("1️⃣  버리기 ");
             Console.Write("2️⃣  리치 ");
@@ -354,11 +354,10 @@ namespace Mahjong
             return keyInt;
         }
 
-        public void Action(Tiles.Tile tile)
+        public void Action()
         {
-            PrintTurn();
-            AddTemp(tile);
             AddHand();
+            PrintTurn();
             switch (ReadActionKey())
             {
                 case ConsoleKey.D0 : break;
@@ -381,16 +380,16 @@ namespace Mahjong
         public void PrintTurn()
         {
             int computerThinking = 3;
-            long waitTime = 200;
+            long waitTime = 300;
             Console.Write($"{Name}님의 순서! ");
             Program.WaitUntilElapsedTime(waitTime);
-            
             Console.Write("컴퓨터 생각중... ");
             for (int i = 0; i < computerThinking; i++)
             {
                 Program.WaitUntilElapsedTime(waitTime);
                 Console.Write("🤔");
             }
+            Program.WaitUntilElapsedTime(waitTime);
         }
 
         public void AddTemp(Tiles.Tile tile)
@@ -410,11 +409,10 @@ namespace Mahjong
             DiscardMyHand(tileNum);
         }
         
-        public void Action(Tiles.Tile tile)
+        public void Action()
         {
-            PrintTurn();
-            AddTemp(tile);
             AddHand();
+            PrintTurn();
             DiscardTile(Program.Random.Next(0, MaxHandTiles));
         }
     }

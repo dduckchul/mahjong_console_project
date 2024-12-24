@@ -1,5 +1,3 @@
-using System;
-
 namespace Mahjong
 {
     public interface IAction
@@ -8,6 +6,6 @@ namespace Mahjong
         void AddTemp(Tiles.Tile tile);
         void AddHand();        
         void DiscardTile(int tileNum);
-        void Action(Tiles.Tile tile);
+        void Action();
     }
 }
