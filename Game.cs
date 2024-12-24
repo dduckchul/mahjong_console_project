@@ -9,32 +9,56 @@ namespace Mahjong
         {
             East,South,West,North
         }
-        
+
+        // 게임 최종 결과에 이긴 사람 설정
+        public const Player Winner = null;        
         public const int GameEndScore = 30000;
-        private Player[] _players;
-        private Deck.PublicDeck _publicDeck;
-        // 현재 바람 확인 (동,남,서,북)
-        private Winds _currentWinds;
+
         private int _gameSize;        
         // 현재 N번째 국인지 확인
         private int _num;
         // 현재 N번째 장인지 저장할때
-        private int _set;
-        
+        private int _set;        
+
+        // 현재 바람 확인 (동,남,서,북)        
+        private Winds _currentWinds;
+        private Player[] _players;
+        private Deck.PublicDeck _publicDeck;
+        // 턴에 관련된 데이터 / 변수들 저장
+        private Turn _turns;
+
         // 게임 종료 조건인지 확인하는 플래그
         private bool _isGameContinue;
-        private bool _isSetContinue;                
+        private bool _isSetContinue;
         
-        // 생성자에 유저 초기화, 유저 초기화 다르게 해야하면 수정필요
+        // 생성자에 턴과 유저 초기화, 유저 초기화 다르게 해야하면 수정필요
         public Game(int maxGameSize)
         {
             GameSize = maxGameSize;
             Wind = Winds.East;
+            Players = Player.InitPlayers();
+            Turns = new Turn(Players);
             IsGameContinue = true;
             IsSetContinue = true;
-            Players = Player.InitPlayers();
         }
         
+        public int GameSize
+        {
+            get { return _gameSize; }
+            set { _gameSize = value; }
+        }
+
+        public int Num
+        {
+            get { return _num; }
+            set { _num = value; }
+        }
+
+        public int Set
+        {
+            get { return _set; }
+            set { _set = value; }
+        }        
         public Player[] Players
         {
             get { return _players; }
@@ -53,22 +77,10 @@ namespace Mahjong
             set { _currentWinds = value; }
         }
 
-        public int GameSize
+        public Turn Turns
         {
-            get { return _gameSize; }
-            set { _gameSize = value; }
-        }
-
-        public int Num
-        {
-            get { return _num; }
-            set { _num = value; }
-        }
-
-        public int Set
-        {
-            get { return _set; }
-            set { _set = value; }
+            get { return _turns; }
+            private set { _turns = value; }
         }
 
         public bool IsGameContinue
@@ -82,6 +94,34 @@ namespace Mahjong
             get { return _isSetContinue; }
             set { _isSetContinue = value; }
         }
+        
+        public void StartGame()
+        {
+            Num++;
+            IsGameContinue = true;
+        }
+
+        public void StartSet()
+        {
+            Set++;
+            IsSetContinue = true;
+
+            // 게임 초기화
+            Turns.InitCurrentPlayer(this);
+            InitSet(false);
+        }
+
+        public void EndGame()
+        {
+            Set = 0;
+            IsGameContinue = false;
+            IsSetContinue = false;
+        }
+
+        public void EndSet()
+        {
+            IsSetContinue = false;            
+        }        
         
         // 유국 될때 때의 조건 4개만 하자...
         // 1. 패를 다 쓴다
@@ -163,47 +203,128 @@ namespace Mahjong
             return true;
         }
 
-        // 게임마다 첫 번째 턴인 유저에게 턴을 준다.
-        // 동 1국 = wind + 1 = (0+1) - 1 % 4 = 0 (동)
-        // 동 2국 = wind + 2 = (0+2) - 1 % 4 = 1 (남)
-        // 남 3국 = wind + 3 = (1+3) - 1 % 4 = 3 (북)
-        // 북 4국 = wind + 4 = (3+4) - 1 % 4 = 6 % 4 = 2 (서)
-        public void FindFirstUser()
+        // 게임 1국에 필요한 것들 모두 초기화
+        public void InitSet(bool isDebug)
         {
-            Winds wind = Wind;
-            int currentGame = Num;
+            // 마작 덱 셔플 & 공용 덱 초기화
+            Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
+            Deck.ShuffleDeck(pilesOfTile);
+            PublicDeck = new Deck.PublicDeck(pilesOfTile);
 
-            int currentPlayerIndex = (int)(wind + currentGame - 1) % 4;
-            Players[currentPlayerIndex].IsPlaying = true;
+            // 플레이어에게 패 나눠주기
+            InitPlayersHand(PublicDeck.PublicStack);
+            
+            // 공용 덱 구성하고 도라 타일 1개 열기
+            PublicDeck.MakePublicDeck();
+
+            // 퍼블릭 덱 검증 출력, 디버그 모드 true 이면 출력
+            DebugGame(isDebug, pilesOfTile);            
+            
+            // 각 플레이어 손패 정렬
+            foreach (Player pl in Players)
+            {
+                pl.Hands.SortMyHand();
+            }
+            
+            PrintGames();
         }
 
-        // 현재 플레이중인 유저의 인덱스를 반환한다.
-        public int FindPlayingUserInx()
+        private void DebugGame(bool isDebug, Tiles.Tile[] pilesOfTile)
         {
+            // 디버그 아니면 탈출
+            if (!isDebug) { return; }
+            // 초기화 덱 나오는지 검증
+            Tiles.PrintDeck(pilesOfTile);
+            // 마작 패 셔플 잘 됐는지 출력
+            Tiles.PrintDeck(PublicDeck.PublicStack.ToArray());
+            
+            if (PublicDeck.IsValidPublicDeck())
+            {
+                Console.WriteLine("정상적으로 생성");
+            }
+            else
+            {
+                Console.WriteLine("이상한 덱 생성 확인해 주세요");
+            }
+        }
+        
+        public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
+        {
+            // 핸드 new 로 초기화
             for (int i = 0; i < Players.Length; i++)
             {
-                if (Players[i].IsPlaying)
-                {
-                    return i;
-                }
+                Players[i].Hands.MyTiles = new Tiles.Tile[Player.MaxHandTiles];
+                Players[i].Hands.Discards = new Tiles.Tile[Player.MaxDiscardTiles];                
             }
-            Console.WriteLine("여기까지 가믄 안되요!!!!");
-            return -1;
-        }
-
-        // 다음 턴 유저 인덱스 반환
-        public int FindNextUserInx()
-        {
-            int playingUserInx = FindPlayingUserInx();
-            playingUserInx++;
             
-            // 유저 인덱스가 4 (마지막 유저 + 1 일때) 처음 유저 0으로 반환한다.
-            if (playingUserInx == Players.Length)
+            int distributeTimes = 3;
+            // 처음은 핸드 최대값 -1 만큼 분배, 분배를 n번으로 쪼개고싶다
+            int wantToDistribute = (Player.MaxHandTiles-1) / distributeTimes;
+            // 마지막 for-loop 에서 줘야하는 타일값
+            int remainderTiles = (Player.MaxHandTiles-1) % distributeTimes;
+            
+            // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
+            long waitTimeLong = 100;            
+            
+            // 반복해서 13개 타일을 n번 분배하는 기능
+            for (int i = 0; i < distributeTimes + 1; i++)
             {
-                return 0;
-            }
+                // wantToDistribute 만큼 타일 분배
+                if (i < distributeTimes)
+                {
+                    for (int j = 0; j < Players.Length; j++)
+                    {
+                        Program.WaitUntilElapsedTime(waitTimeLong);
+                        Players[j].TakeTiles(publicStack,wantToDistribute);
+                        PrintGames();
+                    }     
+                }
+                // 마지막 반복에서는 나머지 타일만 준다
+                if (i == distributeTimes)
+                {
+                    for (int j = 0; j < Players.Length; j++)
+                    {
+                        Program.WaitUntilElapsedTime(waitTimeLong);
+                        Players[j].TakeTiles(publicStack,remainderTiles);
+                        PrintGames();
+                    }
+                }
+            }         
+        }
+        
+        public void PlayingSet()
+        {
+            Player player = Turns.StartCurrentTurn();
 
-            return playingUserInx;
+            // 나부터 하나씩 뽑자
+            Tiles.Tile tile = PublicDeck.Tsumo();
+
+            // 내가 뽑았으면 보이게끔
+            if (player.IsHuman)
+            {
+                tile.IsShowingFront = true;
+            }
+            player.Hands.Temp = tile;
+
+            Program.WaitUntilElapsedTime(500);
+            PrintGames();
+            PrintTurnAndAction(player);
+            if (player.IsHuman)
+            {
+                player.PressKeyAndAction();                    
+            }
+            else
+            {
+                player.ComputerAction();
+            }
+            Turns.EndCurrentTurn();
+            
+            // 게임 유국 조건이면 무승부를 띄우고 게임 초기화, 세트는 0번으로
+            bool isDrawGame = IsDrawGame();
+            if (isDrawGame)
+            {
+                EndGame();
+            }
         }
         
         // 게임의 전체 화면 보여주는 메서드
@@ -285,140 +406,6 @@ namespace Mahjong
             
             Console.Write(Program.ReturnIntToEmoji(ten) + " ");
             Console.Write(Program.ReturnIntToEmoji(one));
-        }
-
-        // 덱 모두 초기화
-        public void InitGame(bool isDebug)
-        {
-            // 마작 덱 셔플 & 공용 덱 초기화
-            Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
-            Deck.ShuffleDeck(pilesOfTile);
-            PublicDeck = new Deck.PublicDeck(pilesOfTile);
-
-            // 플레이어에게 패 나눠주기
-            InitPlayersHand(PublicDeck.PublicStack);
-            
-            // 공용 덱 구성하고 도라 타일 1개 열기
-            PublicDeck.MakePublicDeck();
-
-            // 퍼블릭 덱 검증 출력, 디버그 모드 true 이면 출력
-            DebugGame(isDebug, pilesOfTile);            
-            
-            // 각 플레이어 손패 정렬
-            foreach (Player pl in Players)
-            {
-                pl.Hands.SortMyHand();
-            }
-            
-            PrintGames();            
-        }
-
-        private void DebugGame(bool isDebug, Tiles.Tile[] pilesOfTile)
-        {
-            // 디버그 아니면 탈출
-            if (!isDebug) { return; }
-            // 초기화 덱 나오는지 검증
-            Tiles.PrintDeck(pilesOfTile);
-            // 마작 패 셔플 잘 됐는지 출력
-            Tiles.PrintDeck(PublicDeck.PublicStack.ToArray());
-            
-            if (PublicDeck.IsValidPublicDeck())
-            {
-                Console.WriteLine("정상적으로 생성");
-            }
-            else
-            {
-                Console.WriteLine("이상한 덱 생성 확인해 주세요");
-            }
-        }
-        
-        public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
-        {
-            // 핸드 new 로 초기화
-            for (int i = 0; i < Players.Length; i++)
-            {
-                Players[i].Hands.MyTiles = new Tiles.Tile[Player.MaxHandTiles];
-                Players[i].Hands.Discards = new Tiles.Tile[Player.MaxDiscardTiles];                
-            }
-            
-            int distributeTimes = 3;
-            // 처음은 핸드 최대값 -1 만큼 분배, 분배를 n번으로 쪼개고싶다
-            int wantToDistribute = (Player.MaxHandTiles-1) / distributeTimes;
-            // 마지막 for-loop 에서 줘야하는 타일값
-            int remainderTiles = (Player.MaxHandTiles-1) % distributeTimes;
-            
-            // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
-            long waitTimeLong = 100;            
-            
-            // 반복해서 13개 타일을 n번 분배하는 기능
-            for (int i = 0; i < distributeTimes + 1; i++)
-            {
-                // wantToDistribute 만큼 타일 분배
-                if (i < distributeTimes)
-                {
-                    for (int j = 0; j < Players.Length; j++)
-                    {
-                        Program.WaitUntilElapsedTime(waitTimeLong);
-                        Players[j].TakeTiles(publicStack,wantToDistribute);
-                        PrintGames();
-                    }     
-                }
-                // 마지막 반복에서는 나머지 타일만 준다
-                if (i == distributeTimes)
-                {
-                    for (int j = 0; j < Players.Length; j++)
-                    {
-                        Program.WaitUntilElapsedTime(waitTimeLong);
-                        Players[j].TakeTiles(publicStack,remainderTiles);
-                        PrintGames();
-                    }
-                }
-            }         
-        }
-        
-        public void KeepPlayingSet()
-        {
-            int userInx = FindPlayingUserInx();
-            int nextUserInx = FindNextUserInx();
-            Player currentPlayer = Players[userInx];
-
-            // 나부터 하나씩 뽑자
-            Tiles.Tile tile = PublicDeck.Tsumo();
-            // 뽑은 타일은 보이게끔
-            tile.IsVisible = true;
-            // 내가 뽑았으면 보이게끔
-            if (currentPlayer.IsHuman)
-            {
-                tile.IsShowingFront = true;
-            }
-            currentPlayer.Hands.Temp = tile;
-
-            Program.WaitUntilElapsedTime(500);
-            PrintGames();
-                
-            PrintTurnAndAction(currentPlayer);
-            if (currentPlayer.IsHuman)
-            {
-                currentPlayer.PressKeyAndAction();                    
-            }
-            else
-            {
-                currentPlayer.ComputerAction();
-            }
-
-            // 키 입력후에는 한턴 넘어가는것으로 판단한다.
-            currentPlayer.IsPlaying = false;
-            Players[nextUserInx].IsPlaying = true;
-            
-            // 게임 유국 조건이면 무승부를 띄우고 게임 초기화, 세트는 0번으로
-            bool isDrawGame = IsDrawGame();
-            if (isDrawGame)
-            {
-                Set = 0;
-                IsGameContinue = false;
-                IsSetContinue = false;
-                Players[nextUserInx].IsPlaying = false;
-            }
         }        
 
         public void PrintTurnAndAction(Player player)
@@ -437,7 +424,7 @@ namespace Mahjong
             else
             {
                 int computerThinking = 3;
-                long waitTime = 300;
+                long waitTime = 200;
                 
                 Console.Write("컴퓨터 생각중... ");
                 for (int i = 0; i < computerThinking; i++)

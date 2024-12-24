@@ -158,7 +158,12 @@ namespace Mahjong
                 }
 
                 CurrentTileIndex++;
-                return PublicStack.Pop();
+
+                // 뽑은 타일은 보이게끔
+                Tiles.Tile drawedTile = PublicStack.Pop();
+                drawedTile.IsVisible = true;
+                
+                return drawedTile;
             }
         }
 

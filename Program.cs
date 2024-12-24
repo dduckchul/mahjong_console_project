@@ -25,7 +25,7 @@ namespace Mahjong
             IsRunning = true;
             
             // 게임 초기화. 동풍전 1국 1번장부터 시작, 동풍전 이상 하고싶으면 Size 늘리기
-            // 게임 생성시 유저도 같이 초기화
+            // 게임 생성시 유
             Game game = new Game(4);
             
             // 게임 기억하기
@@ -35,18 +35,13 @@ namespace Mahjong
             // 게임 진짜 시작
             while (IsRunning)
             {
-                game.Num++;
-                game.IsGameContinue = true;
+                game.StartGame();
                 while (IsRunning && game.IsGameContinue)
                 {
-                    // 게임 초기화
-                    game.InitGame(true);
-                    game.FindFirstUser();
-                    game.Set++;
-                    game.IsSetContinue = true;
+                    game.StartSet();
                     while (IsRunning && game.IsSetContinue)
                     {
-                        game.KeepPlayingSet();
+                        game.PlayingSet();
                     }                    
                 }
             }
