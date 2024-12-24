@@ -15,7 +15,6 @@ namespace Mahjong
         
         // 플레이어 정보
         private int _score;
-        private bool _isHuman;
         
         // 플레이어의 현재 진행중 게임 정보
         private bool _isPlaying;
@@ -24,11 +23,10 @@ namespace Mahjong
         private Game.Winds _wind;
         private Deck.Hands _hands;
 
-        public Player(string name, bool isHuman, Game.Winds wind)
+        public Player(string name, Game.Winds wind)
         {
             Name = name;
             Score = DefaultScore;
-            IsHuman = isHuman;
             Wind = wind;
             Hands = new Deck.Hands();
         }
@@ -41,12 +39,6 @@ namespace Mahjong
         {
             get { return _score; }
             private set { _score = value; }
-        }
-
-        public bool IsHuman
-        {
-            get { return _isHuman; }
-            set { _isHuman = value; }
         }
         
         public Game.Winds Wind
@@ -86,29 +78,15 @@ namespace Mahjong
             // Players.Player me = players.SetMyAvata("");
             string[] cpuName = {"암거나", "알파고", "오픈AI", "잼민이"};            
             Player[] players = new Player[MaxPlayers];
-            players[0] = SetMyAvata("저에요");
+            players[0] = Human.SetMyAvata("저에요");
             
             // 0번에 나를 넣었음
             for (int i = 1; i < MaxPlayers; i++)
             {
                 Game.Winds winds = (Game.Winds)Enum.Parse(typeof(Game.Winds), i.ToString());
-                players[i] = new Player(cpuName[i], false, winds);
+                players[i] = new Cpu(cpuName[i], winds);
             }
             return players;
-        }
-        
-        // 빈칸으로 두면 입력창 받도록, 귀찮아서 이름 넘김
-        private static Player SetMyAvata(string playerName)
-        {
-            Console.WriteLine("당신의 이름을 입력해 주세요 🤔");
-            
-            if (playerName == "")
-            {
-                playerName = Console.ReadLine();
-            }
-
-            Console.WriteLine($"안녕하세요~ {playerName}님");
-            return new Player(playerName, true, Game.Winds.East);
         }
         
         // 플레이어가 number 개 만큼 타일 가져가기
@@ -123,7 +101,7 @@ namespace Mahjong
                 for (int j = 0; j < Hands.MyTiles.Length; j++)
                 {
                     tile.IsVisible = true;
-                    if (IsHuman)
+                    if (this is Human)
                     {
                         tile.IsShowingFront = true;
                     }
@@ -154,7 +132,7 @@ namespace Mahjong
         {
             Console.Write(Name+"\t");
             
-            if (IsHuman)
+            if (this is Human)
             {
                 Console.Write("👤");
             }
@@ -216,19 +194,141 @@ namespace Mahjong
             Console.Write("🗑️\t:\t");
             Tiles.PrintDeck(Hands.Discards);
         }
+        
+        // 선택한 타일 Discard 핸드에 넣고 버리기
+        // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
+        // 버림패는 무조건 공개
+        public void DiscardMyHand(int keyInt)
+        {
+            Tiles.Tile discard = Hands.MyTiles[keyInt];
+            discard.IsShowingFront = true;
+            Hands.MyTiles[keyInt] = Hands.Temp;
+            Hands.MyTiles[MaxHandTiles - 1] = new Tiles.Tile();
 
-        public void UserAddTempAndDiscardTile()
+            int lastDiscard = Hands.FindLastDiscardInx();
+            Hands.Discards[lastDiscard] = discard;
+            Hands.Temp = new Tiles.Tile();
+            Hands.SortMyHand();
+        }
+
+        // C# equals 재정의
+        // https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type
+        public bool Equals(Player other)
+        {
+            // 널 & 타입 비교
+            if (other == null || GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            // 주소값 비교
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            // 이름 같으면 같은 사람으로 치자
+            return Name == other.Name;
+        }
+    }
+
+    public class Human : Player, IPlayable
+    {
+        public Human(string name, Game.Winds wind) : base(name, wind) { }
+
+        // 빈칸으로 두면 입력창 받도록, 귀찮아서 이름 넘김
+        public static Player SetMyAvata(string playerName)
+        {
+            Console.WriteLine("당신의 이름을 입력해 주세요 🤔");
+            
+            if (playerName == "")
+            {
+                playerName = Console.ReadLine();
+            }
+
+            Console.WriteLine($"안녕하세요~ {playerName}님");
+            return new Human(playerName, Game.Winds.East);
+        }        
+
+        // 핸드에 temp 더하기
+        public void PrintTurn()
+        {
+            Program.WaitUntilElapsedTime(300);
+            Console.Write($"{Name}님의 순서! ");
+            Console.Write("1️⃣  버리기 ");
+            Console.Write("2️⃣  리치 ");
+            Console.Write("3️⃣  쯔모 ");
+            Console.Write("4️⃣  깡 ");
+            Console.Write("0️⃣  종료");
+            Console.WriteLine("");            
+        }
+
+        public void AddTemp(Tiles.Tile tile)
+        {
+            tile.IsShowingFront = true;
+            Hands.Temp = tile;
+        }
+
+        public void AddHand()
+        {
+            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;
+        }
+
+        public void DiscardTile(int tileNum)
+        {
+            DiscardMyHand(tileNum);
+        }
+
+        public ConsoleKey ReadActionKey()
+        {
+            // 기능 구현중 or 잘못된 키 판별 하는 변수
+            bool isFalseKey = true;
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            
+            while (isFalseKey)
+            {
+                if (keyInfo.Key == ConsoleKey.D1)
+                {
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D2)
+                {
+                    Console.WriteLine("🚜👷리치 구현중....⛏️");
+                } else if (keyInfo.Key == ConsoleKey.D3)
+                {
+                    Console.WriteLine("🚜👷쯔모 구현중....⛏️");
+                } else if (keyInfo.Key == ConsoleKey.D4)
+                {
+                    Console.WriteLine("🚜👷깡 구현중....⛏️");
+                } else if (keyInfo.Key == ConsoleKey.D0)
+                {
+                    isFalseKey = false;
+                    Program.IsRunning = false;
+                    Console.WriteLine("게임을 종료합니다..👋");
+                }
+                else
+                {
+                    Console.WriteLine("잘못된 키입니다.");
+                }
+                // 틀린 키일 때 한번 더
+                if (isFalseKey)
+                {
+                    keyInfo = Console.ReadKey(true);
+                }
+            }
+
+            return keyInfo.Key;
+        }
+
+        public void PrintDiscard()
         {
             Console.Clear();
-            
-            // 핸드에 temp 더하기
-            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;
-
-            // 핸드 정렬
             Console.WriteLine("버릴 타일을 선택 해 주세요\n");
             Tiles.PrintDeck(Hands.MyTiles);
-            Console.Write("\n0 1 2 3 4 5 6 7 8 9 A B C D\n");
-            
+            Console.Write("\n0 1 2 3 4 5 6 7 8 9 A B C D\n");            
+        }
+        
+        public int ReadDiscardKey()
+        {
             ConsoleKeyInfo keyInfo;
             bool parseResult = false;
             int keyInt = 0;
@@ -250,116 +350,72 @@ namespace Mahjong
                     Console.WriteLine("잘못된 키를 입력하셨습니다");
                 }                
             }
-            DiscardTile(keyInt);
+
+            return keyInt;
         }
+
+        public void Action(Tiles.Tile tile)
+        {
+            PrintTurn();
+            AddTemp(tile);
+            AddHand();
+            switch (ReadActionKey())
+            {
+                case ConsoleKey.D0 : break;
+                case ConsoleKey.D1 :
+                {
+                    PrintDiscard();
+                    int ind = ReadDiscardKey();
+                    DiscardTile(ind);
+                    break;
+                }
+            }
+        }
+    }
+
+    public class Cpu : Player, IAction
+    {
+        public Cpu(string name, Game.Winds wind) : base(name, wind) { }
         
+        // 핸드에 temp 더하기
+        public void PrintTurn()
+        {
+            int computerThinking = 3;
+            long waitTime = 200;
+            Console.Write($"{Name}님의 순서! ");
+            Program.WaitUntilElapsedTime(waitTime);
+            
+            Console.Write("컴퓨터 생각중... ");
+            for (int i = 0; i < computerThinking; i++)
+            {
+                Program.WaitUntilElapsedTime(waitTime);
+                Console.Write("🤔");
+            }
+        }
+
+        public void AddTemp(Tiles.Tile tile)
+        {
+            Hands.Temp = tile;
+        }
+
+        public void AddHand()
+        {
+            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;
+        }
+
         // 컴퓨터가 하는 행동
         // To-Do : 더 업그레이드 하면 좋겠지만 그냥 랜덤으로 뽑아서 버리자
-        public void AiAddTempAndDiscardTile()
+        public void DiscardTile(int tileNum)
         {
-            // 핸드에 temp 더하기
-            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;            
-            Random rand = new Random();
-            DiscardTile(rand.Next(0,MaxHandTiles));
+            DiscardMyHand(tileNum);
         }
         
-        // 선택한 타일 Discard 핸드에 넣고 버리기
-        // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
-        // 버림패는 무조건 공개
-        public void DiscardTile(int keyInt)
+        public void Action(Tiles.Tile tile)
         {
-            Tiles.Tile discard = Hands.MyTiles[keyInt];
-            discard.IsShowingFront = true;
-            Hands.MyTiles[keyInt] = Hands.Temp;
-            Hands.MyTiles[MaxHandTiles - 1] = new Tiles.Tile();
-
-            int lastDiscard = FindLastDiscardInx();
-            Hands.Discards[lastDiscard] = discard;
-            Hands.Temp = new Tiles.Tile();
-            Hands.SortMyHand();
-        }
-
-        // 비어있는 공간 찾기
-        public int FindLastDiscardInx()
-        {
-            for (int i = 0; i < Hands.Discards.Length; i++)
-            {
-                if (!Hands.Discards[i].IsValidTile())
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        
-        public void PressKeyAndAction()
-        {
-            // 기능 구현중 or 잘못된 키 판별 하는 변수
-            bool isFalseKey = true;
-            ConsoleKeyInfo keyInfo;
-            
-            while (isFalseKey)
-            {
-                keyInfo = Console.ReadKey(true);
-                if (keyInfo.Key == ConsoleKey.D1)
-                {
-                    isFalseKey = false;
-                    UserAddTempAndDiscardTile();
-                    Program.WaitUntilElapsedTime(200);
-                } else if (keyInfo.Key == ConsoleKey.D2)
-                {
-                    Console.WriteLine("🚜👷리치 구현중....⛏️");
-                    Program.WaitUntilElapsedTime(200);
-                } else if (keyInfo.Key == ConsoleKey.D3)
-                {
-                    Console.WriteLine("🚜👷쯔모 구현중....⛏️");
-                    Program.WaitUntilElapsedTime(200);
-                } else if (keyInfo.Key == ConsoleKey.D4)
-                {
-                    Console.WriteLine("🚜👷깡 구현중....⛏️");
-                    Program.WaitUntilElapsedTime(200);                    
-                } else if (keyInfo.Key == ConsoleKey.D0)
-                {
-                    Program.IsRunning = false;
-                    isFalseKey = false;
-                    Console.WriteLine("게임을 종료합니다..👋");
-                    Program.WaitUntilElapsedTime(200);
-                }
-                else
-                {
-                    Console.WriteLine("잘못된 키입니다.");
-                }                
-            }
-        }        
-        
-        public void ComputerAction()
-        {
-            AiAddTempAndDiscardTile();
-        }
-
-        // C# equals 재정의
-        // https://learn.microsoft.com/ko-kr/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type
-        public bool Equals(Player other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            // 타입 비교
-            if (this.GetType() != other.GetType())
-            {
-                return false;
-            }
-            
-            // 주소값 비교
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            // 이름과 휴먼인지만 같으면 같은 사람으로 치자
-            return Name == other.Name && IsHuman == other.IsHuman;
+            PrintTurn();
+            AddTemp(tile);
+            AddHand();
+            DiscardTile(Program.Random.Next(0, MaxHandTiles));
         }
     }
 }

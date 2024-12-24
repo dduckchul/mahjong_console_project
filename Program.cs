@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace Mahjong
 {
@@ -7,6 +8,7 @@ namespace Mahjong
         // 다른곳과 같이 쓸 StopWatch 클래스
         private static Stopwatch _stopwatch;
         private static bool _isRunning;
+        private static Random _random;
         
         public static bool IsRunning
         {
@@ -18,6 +20,18 @@ namespace Mahjong
         {
             get { return _stopwatch; }
             private set { _stopwatch = value; }
+        }
+
+        public static Random Random
+        {
+            get
+            {
+                if (_random == null)
+                {
+                    _random = new Random();
+                }
+                return _random;
+            }
         }
 
         public static void Main(string[] args)

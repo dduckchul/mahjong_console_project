@@ -293,31 +293,16 @@ namespace Mahjong
         public void PlayingSet()
         {
             Player player = Turns.StartCurrentTurn();
-
             // 턴 뺏어버리기 예제
             // Turns.FindAndSetCurrent(me);
             // player = Turns.CurrentPlayer.Value;
             
             Tiles.Tile tile = PublicDeck.Tsumo();
-
-            // 내가 뽑았으면 보이게끔
-            if (player.IsHuman)
-            {
-                tile.IsShowingFront = true;
-            }
-            player.Hands.Temp = tile;
-
             Program.WaitUntilElapsedTime(500);
             PrintGames();
-            PrintTurnAndAction(player);
-            if (player.IsHuman)
-            {
-                player.PressKeyAndAction();                    
-            }
-            else
-            {
-                player.ComputerAction();
-            }
+
+            (player as IAction)?.Action(tile);
+            
             Turns.EndCurrentTurn();
             
             // 게임 유국 조건이면 무승부를 띄우고 게임 초기화, 세트는 0번으로
@@ -349,7 +334,7 @@ namespace Mahjong
             }
         }
 
-        public void PrintGameInfo()
+        private void PrintGameInfo()
         {
             string wind = "😱";
             switch (Wind)
@@ -376,7 +361,7 @@ namespace Mahjong
         }
         
         // 게임 위 정보 화면
-        public static void PrintHeadInfo()
+        private void PrintHeadInfo()
         {
             Console.Write("👦\t");
             Console.Write("💨\t");
@@ -385,13 +370,13 @@ namespace Mahjong
             Console.Write("💭");
         }
 
-        public void PrintDoraTiles()
+        private void PrintDoraTiles()
         {
             Console.Write("  도라 : ");
             Tiles.PrintDeck(PublicDeck.DoraTiles);
         }
 
-        public void PrintLeftTiles()
+        private void PrintLeftTiles()
         {
             int leftTiles = PublicDeck.PublicStack.Count;
             int hund = leftTiles / 100;
@@ -408,32 +393,5 @@ namespace Mahjong
             Console.Write(Program.ReturnIntToEmoji(ten) + " ");
             Console.Write(Program.ReturnIntToEmoji(one));
         }        
-
-        public void PrintTurnAndAction(Player player)
-        {
-            Program.WaitUntilElapsedTime(1000);
-            Console.Write($"{player.Name}님의 순서! ");
-            if (player.IsHuman)
-            {
-                Console.Write("1️⃣  버리기 ");
-                Console.Write("2️⃣  리치 ");
-                Console.Write("3️⃣  쯔모 ");
-                Console.Write("4️⃣  깡 ");
-                Console.Write("0️⃣  종료");
-                Console.WriteLine("");
-            }
-            else
-            {
-                int computerThinking = 3;
-                long waitTime = 200;
-                
-                Console.Write("컴퓨터 생각중... ");
-                for (int i = 0; i < computerThinking; i++)
-                {
-                    Program.WaitUntilElapsedTime(waitTime);
-                    Console.Write("🤔");
-                }
-            }
-        }
     }
 }

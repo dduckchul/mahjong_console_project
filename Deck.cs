@@ -241,6 +241,19 @@ namespace Mahjong
                         }
                     }
                 }
+            }
+            
+            // 비어있는 공간 찾기
+            public int FindLastDiscardInx()
+            {
+                for (int i = 0; i < Discards.Length; i++)
+                {
+                    if (!Discards[i].IsValidTile())
+                    {
+                        return i;
+                    }
+                }
+                return -1;
             }            
         }
         
