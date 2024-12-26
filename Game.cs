@@ -421,7 +421,7 @@ namespace Mahjong
                 return;
             }
 
-            Tiles.Tile[] joojakTiles = new Tiles.Tile[]
+            Tiles.Tile[] joojakTiles =
             {
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
@@ -429,13 +429,13 @@ namespace Mahjong
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 6, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
                 new Tiles.Tile(Tiles.TileType.Wind, 0, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 1, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 2, false),                
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)
