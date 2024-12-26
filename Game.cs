@@ -106,7 +106,7 @@ namespace Mahjong
 
             // 게임 초기화
             Turns.InitCurrentPlayer(this);
-            InitSet(false);
+            InitSet(false, true);
         }
 
         public void EndGame()
@@ -204,7 +204,7 @@ namespace Mahjong
         }
 
         // 게임 1국에 필요한 것들 모두 초기화
-        public void InitSet(bool isDebug)
+        public void InitSet(bool isDebug, bool isJoojak)
         {
             // 마작 덱 셔플 & 공용 덱 초기화
             Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
@@ -218,27 +218,29 @@ namespace Mahjong
             PublicDeck.MakePublicDeck();
 
             // 퍼블릭 덱 검증 출력, 디버그 모드 true 이면 출력
-            DebugGame(isDebug, pilesOfTile);            
+            DebugGame(isDebug, pilesOfTile);
+            // 테스트용 게임 조작하기
+            MakeJooJakHand(isJoojak, this);
             
             // 각 플레이어 손패 정렬
             foreach (Player pl in Players)
             {
-                pl.Hands.SortMyHand();
+                pl.Hands.SortMyHand(Player.MaxHandTiles - 1);
             }
             
             PrintGames();
         }
-        
+
         public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
         {
             // 핸드 new 로 초기화
             for (int i = 0; i < Players.Length; i++)
             {
-                Players[i].Hands.MyTiles = new Tiles.Tile[Player.MaxHandTiles];
-                Players[i].Hands.Discards = new Tiles.Tile[Player.MaxDiscardTiles];                
+                Players[i].Hands.MyTiles = new List<Tiles.Tile>();
+                Players[i].Hands.Discards = new List<Tiles.Tile>();                
             }
             
-            int distributeTimes = 3;
+            int distributeTimes = 4;
             // 처음은 핸드 최대값 -1 만큼 분배, 분배를 n번으로 쪼개고싶다
             int wantToDistribute = (Player.MaxHandTiles-1) / distributeTimes;
             // 마지막 for-loop 에서 줘야하는 타일값
@@ -395,6 +397,56 @@ namespace Mahjong
             {
                 Console.WriteLine("이상한 덱 생성 확인해 주세요");
             }
+        }
+        
+        // 테스트용 주작 핸드 만들기
+        private void MakeJooJakHand(bool isJoojak, Game game)
+        {
+            if (!isJoojak) { return; }
+            
+            Human human = null;
+            foreach (Player p in game.Players)
+            {
+                if (p is Human)
+                {
+                    human = p as Human;
+                } 
+            }
+            
+            // 뭔가 잘못되었음, 사람이 없다 ㄷㄷ
+            if (human == null)
+            {
+                Console.WriteLine("주작 할수가 없습니다..");
+                return;
+            }
+
+            Tiles.Tile[] joojakTiles = new Tiles.Tile[]
+            {
+                new Tiles.Tile(Tiles.TileType.Man, 1, false),
+                new Tiles.Tile(Tiles.TileType.Man, 1, false),
+                new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                new Tiles.Tile(Tiles.TileType.Man, 3, false),
+                new Tiles.Tile(Tiles.TileType.Man, 3, false),
+                new Tiles.Tile(Tiles.TileType.Man, 4, false),
+                new Tiles.Tile(Tiles.TileType.Man, 4, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 6, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 7, false)
+            };
+
+            for (int i = 0; i < joojakTiles.Length; i++)
+            {
+                if (joojakTiles[i].IsValidTile())
+                {
+                    joojakTiles[i].IsVisible = true;
+                    joojakTiles[i].IsShowingFront = true;
+                }
+            }
+
+            human.Hands.MyTiles = new List<Tiles.Tile>(joojakTiles);
         }        
     }
 }

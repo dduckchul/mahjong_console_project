@@ -5,7 +5,9 @@ namespace Mahjong
         void PrintTurn();
         void AddTemp(Tiles.Tile tile);
         void AddHand();        
-        void DiscardTile(int tileNum);
+        void DiscardTile(int tileNum, bool isRiichi);
         void Action();
+
+        void Riichi();
     }
 }
