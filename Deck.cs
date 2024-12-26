@@ -5,7 +5,6 @@ namespace Mahjong
 {
     public class Deck
     {
-        public const int DistributedTiles = 52;
         public const int PublicTiles = 70;
         public const int MaxDoraTiles = 5;
         public const int MaxYungsangTiles = 4;
@@ -173,6 +172,13 @@ namespace Mahjong
             private List<Tiles.Tile> _discards;
             private Tiles.Tile _temp;
             private List<Tiles.Tile[]> _openedBodies;
+
+            public Hands()
+            {
+                MyTiles = new List<Tiles.Tile>();
+                Discards = new List<Tiles.Tile>();
+                OpenedBodies = new List<Tiles.Tile[]>();
+            }
             
             public List<Tiles.Tile> MyTiles
             {
@@ -201,18 +207,12 @@ namespace Mahjong
             // 1. Sort By Type,
             // 2. Sort By Number
             // Limit 까지 정렬하는데, 그 이상 하면 스택 오버플로우, 예외처리
-            public void SortMyHand(int limit)
+            public void SortMyHand()
             {
-                if (limit > MyTiles.Count)
-                {
-                    Console.WriteLine("정렬을 할 수 없습니다.");
-                    Program.WaitUntilElapsedTime(100);
-                }
-                
                 // 단순하게 하면.. Type 으로 정렬, Number 로 정렬 이중포문 두번
-                for (int i = 0; i < limit; i++)
+                for (int i = 0; i < MyTiles.Count; i++)
                 {
-                    for (int j = i + 1; j < limit; j++)
+                    for (int j = i + 1; j < MyTiles.Count; j++)
                     {
                         int myTilesType = (int)MyTiles[i].Type;
                         int nextTilesType = (int)MyTiles[j].Type;
@@ -226,9 +226,9 @@ namespace Mahjong
                 }
             
                 // myTile 변경될때 인덱스를 기억해뒀다가 다시 정렬
-                for (int i = 0; i < limit; i++)
+                for (int i = 0; i < MyTiles.Count; i++)
                 {
-                    for (int j = i + 1; j < limit; j++)
+                    for (int j = i + 1; j < MyTiles.Count; j++)
                     {
                         int myTileNumber = MyTiles[i].Number;
                         int nextTileNumber = MyTiles[j].Number;

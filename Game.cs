@@ -225,7 +225,7 @@ namespace Mahjong
             // 각 플레이어 손패 정렬
             foreach (Player pl in Players)
             {
-                pl.Hands.SortMyHand(Player.MaxHandTiles - 1);
+                pl.Hands.SortMyHand();
             }
             
             PrintGames();
@@ -233,11 +233,12 @@ namespace Mahjong
 
         public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
         {
-            // 핸드 new 로 초기화
+            // 핸드 초기화 수정
             for (int i = 0; i < Players.Length; i++)
             {
-                Players[i].Hands.MyTiles = new List<Tiles.Tile>();
-                Players[i].Hands.Discards = new List<Tiles.Tile>();                
+                Players[i].Hands.MyTiles.Clear();
+                Players[i].Hands.Discards.Clear();
+                Players[i].Hands.OpenedBodies.Clear();
             }
             
             int distributeTimes = 4;
@@ -247,7 +248,7 @@ namespace Mahjong
             int remainderTiles = (Player.MaxHandTiles-1) % distributeTimes;
             
             // 얼마나 빨리 나눠줄지, 적을수록 순식간에 줌
-            long waitTimeLong = 200;            
+            long waitTimeLong = 100;            
             
             // 반복해서 13개 타일을 n번 분배하는 기능
             for (int i = 0; i < distributeTimes + 1; i++)
@@ -422,19 +423,19 @@ namespace Mahjong
 
             Tiles.Tile[] joojakTiles = new Tiles.Tile[]
             {
-                new Tiles.Tile(Tiles.TileType.Man, 1, false),
-                new Tiles.Tile(Tiles.TileType.Man, 1, false),
+                new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 3, false),
-                new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 6, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 7, false)
+                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 1, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 2, false),                
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)

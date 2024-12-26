@@ -8,6 +8,9 @@ namespace Mahjong
         void DiscardTile(int tileNum, bool isRiichi);
         void Action();
 
+        // 아래는 마작 역을 판단하는 액션
         void Riichi();
+        void Tsumo();
+
     }
 }
