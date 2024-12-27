@@ -21,6 +21,7 @@ namespace Mahjong
         private bool _isCrying;
         private Game.Winds _wind;
         private Deck.Hands _hands;
+        private Yaku _yaku;
 
         public Player(string name, Game.Winds wind)
         {
@@ -28,6 +29,7 @@ namespace Mahjong
             Score = DefaultScore;
             Wind = wind;
             Hands = new Deck.Hands();
+            PlayerYaku = new Yaku();
         }
         public String Name
         {
@@ -70,6 +72,12 @@ namespace Mahjong
             private set { _hands = value; }
         }
 
+        protected Yaku PlayerYaku
+        {
+            get { return _yaku; }
+            set { _yaku = value; }
+        }
+
         // 나는 초기화 했다고 가정, cpu 플레이어 생성해주기
         public static Player[] InitPlayers()
         {
@@ -86,6 +94,14 @@ namespace Mahjong
                 players[i] = new Cpu(cpuName[i], winds);
             }
             return players;
+        }
+
+        public void InitPlayerFlags()
+        {
+            IsPlaying = false;
+            IsRiichi = false;
+            IsCrying = false;
+            Hands.Temp = new Tiles.Tile();
         }
         
         // 플레이어가 number 개 만큼 타일 가져가기
@@ -247,22 +263,22 @@ namespace Mahjong
             Console.Write($"{Name}님의 순서! ");
             Console.Write("1️⃣  버리기 ");
             
-            if (Yaku.CanRiichi(this))
+            if (PlayerYaku.CanRiichi(this))
             {
                 Console.Write("2️⃣  리치 ");
             }
             
-            if (Yaku.CanTsumo(this))
+            if (PlayerYaku.CanTsumo(this))
             {
                 Console.Write("3️⃣  쯔모 ");
             }
 
-            if (Yaku.CanRon(this))
+            if (PlayerYaku.CanRon(this))
             {
                 Console.Write("4️⃣  론 ");
             }
 
-            if (Yaku.CanKang(this))
+            if (PlayerYaku.CanKang(this))
             {
                 Console.Write("5️⃣  깡 ");
             }
@@ -299,16 +315,16 @@ namespace Mahjong
                 if (keyInfo.Key == ConsoleKey.D1)
                 {
                     isFalseKey = false;
-                } else if (keyInfo.Key == ConsoleKey.D2 && Yaku.CanRiichi(this))
+                } else if (keyInfo.Key == ConsoleKey.D2 && PlayerYaku.CanRiichi(this))
                 {
                     isFalseKey = false;
-                } else if (keyInfo.Key == ConsoleKey.D3 && Yaku.CanTsumo(this))
+                } else if (keyInfo.Key == ConsoleKey.D3 && PlayerYaku.CanTsumo(this))
                 {
-                    Console.WriteLine("🚜👷쯔모 구현중....⛏️");
-                } else if (keyInfo.Key == ConsoleKey.D4 && Yaku.CanRon(this))
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D4 && PlayerYaku.CanRon(this))
                 {
                     Console.WriteLine("🚜👷론 구현중....⛏️");                    
-                } else if (keyInfo.Key == ConsoleKey.D5 && Yaku.CanKang(this))
+                } else if (keyInfo.Key == ConsoleKey.D5 && PlayerYaku.CanKang(this))
                 {
                     Console.WriteLine("🚜👷깡 구현중....⛏️");
                 } else if (keyInfo.Key == ConsoleKey.D0)
@@ -366,9 +382,11 @@ namespace Mahjong
             return keyInt;
         }
 
-        public void Action()
+        // 핸드에 임시 타일 추가, 역 계산, 행동 표시, 입력키에 따른 행동
+        public void Action(Game game)
         {
             AddHand();
+            PlayerYaku.InitYaku(Hands);
             PrintTurn();
             switch (ReadActionKey())
             {
@@ -385,7 +403,7 @@ namespace Mahjong
                 }
                 case ConsoleKey.D3:
                 {
-                    Tsumo();
+                    Tsumo(game);
                     break;
                 }                
             }
@@ -400,25 +418,41 @@ namespace Mahjong
         public void Riichi()
         {
             // 그럴일 없겠지만 만약 리치 할 수 없다면 바로 리턴. 
-            if (!Yaku.CanRiichi(this))
+            if (!PlayerYaku.CanRiichi(this))
             {
                 return;
             }
-            
             Score -= 1000;
             IsRiichi = true;
             PrintDiscard();
             DiscardTile(ReadDiscardKey(), true);            
         }
-
         
-        public void Tsumo()
+        public void Tsumo(Game game)
         {
+            Console.Clear();
             // 이상하게 쯔모한다면 바로 리턴
-            if (!Yaku.CanTsumo(this))
+            if (!PlayerYaku.CanTsumo(this))
             {
                 return;
             }
+            Console.WriteLine("쯔모냥!!!");
+            Program.WaitUntilElapsedTime(500);
+            game.PrintGames();
+            Program.WaitUntilElapsedTime(1000);
+            game.EndSet();
+        }
+
+        public void Ron(Game game)
+        {
+            // 이상하게 론 한다면 바로 리턴
+            if (!PlayerYaku.CanRon(this))
+            {
+                return;
+            }
+            Program.WaitUntilElapsedTime(1000);
+            Console.WriteLine("론냐!!!");
+            game.EndSet();
         }
     }
 
@@ -460,9 +494,10 @@ namespace Mahjong
             Hands.SortMyHand();
         }        
         
-        public void Action()
+        public void Action(Game game)
         {
             AddHand();
+            PlayerYaku.InitYaku(Hands);
             PrintTurn();
             DiscardTile(Program.Random.Next(0, MaxHandTiles), false);
         }
@@ -472,7 +507,12 @@ namespace Mahjong
 
         }
 
-        public void Tsumo()
+        public void Tsumo(Game game)
+        {
+            
+        }
+
+        public void Ron(Game game)
         {
             
         }

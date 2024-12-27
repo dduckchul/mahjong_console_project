@@ -118,6 +118,10 @@ namespace Mahjong
 
         public void EndSet()
         {
+            foreach (Player pl in Players)
+            {
+                pl.InitPlayerFlags();
+            }
             IsSetContinue = false;            
         }        
         
@@ -138,7 +142,7 @@ namespace Mahjong
             }
 
             // 2. 사풍연타. 4번째 턴에만 나오는 무승부, 4턴째인지 확인
-            if (PublicDeck.CurrentTileIndex == 3)
+            if (PublicDeck.CurrentTileIndex == 4)
             {
                 // 1번은 뛰어넘고 비교
                 Tiles.TileType tempType = Players[0].Hands.Discards[0].Type;
@@ -222,7 +226,7 @@ namespace Mahjong
             // 테스트용 게임 조작하기
             MakeJooJakHand(isJoojak, this);
             
-            // 각 플레이어 손패 정렬
+            // 각 플레이어 손패 정렬 & 플래그 초기화
             foreach (Player pl in Players)
             {
                 pl.Hands.SortMyHand();
@@ -288,7 +292,8 @@ namespace Mahjong
             Tiles.Tile tile = PublicDeck.Tsumo();
             (player as IAction)?.AddTemp(tile);
             PrintGames();
-            (player as IAction)?.Action();
+            (player as IAction)?.Action(this);
+
             
             Turns.EndCurrentTurn();
             
