@@ -29,12 +29,16 @@ namespace Mahjong
         private bool _isGameContinue;
         private bool _isSetContinue;
         
+        // 나를 저장하는 임시 변수
+        private Player _me;
+        
         // 생성자에 턴과 유저 초기화, 유저 초기화 다르게 해야하면 수정필요
         public Game(int maxGameSize)
         {
             GameSize = maxGameSize;
             Wind = Winds.East;
-            Players = Player.InitPlayers();
+            // 편하게 생성하면서 Me에 나를 넣어줌
+            Players = Player.InitPlayers(this);
             Turns = new Turn(Players);
             IsGameContinue = true;
             IsSetContinue = true;
@@ -92,6 +96,12 @@ namespace Mahjong
             get { return _isSetContinue; }
             set { _isSetContinue = value; }
         }
+
+        public Player Me
+        {
+            get { return _me; }
+            set { _me = value; }
+        }
         
         public void StartGame()
         {
@@ -127,14 +137,14 @@ namespace Mahjong
                 pl.InitPlayerFlags();
             }
             IsSetContinue = false;            
-        }        
+        }
         
         // 유국 될때 때의 조건 4개만 하자...
         // 1. 패를 다 쓴다
         // 2. 사풍연타
         // 3. 구종구패 -> 플레이어가 선택해야되기 때문에 나중에 구현하자
         // 4. 한 세트에서 깡이 네번 나왔을때 (깡 구현시 구현)
-        public bool IsDrawGame()
+        private bool IsDrawGame()
         {
             // 1. 패를 다 쓴다.
             if (PublicDeck.PublicStack.Count == 0)
@@ -212,7 +222,7 @@ namespace Mahjong
         }
 
         // 게임 1국에 필요한 것들 모두 초기화
-        public void InitSet(bool isDebug, bool isJoojak)
+        private void InitSet(bool isDebug, bool isJoojak)
         {
             // 마작 덱 셔플 & 공용 덱 초기화
             Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
@@ -239,7 +249,7 @@ namespace Mahjong
             PrintGames();
         }
 
-        public void InitPlayersHand(Stack<Tiles.Tile> publicStack)
+        private void InitPlayersHand(Stack<Tiles.Tile> publicStack)
         {
             // 핸드 초기화 수정
             for (int i = 0; i < Players.Length; i++)
@@ -289,21 +299,19 @@ namespace Mahjong
         public void PlayingSet()
         {
             Player player = Turns.StartCurrentTurn();
-            // 턴 뺏어버리기 예제
-            // Turns.FindAndSetCurrent(me);
-            // player = Turns.CurrentPlayer.Value;
-            
             Tiles.Tile tile = PublicDeck.Tsumo();
             (player as IAction)?.AddTemp(tile);
             PrintGames();
             (player as IAction)?.Action(this);
-
+            
+            // 턴 뺏어버리기 예제
+            // Turns.FindAndSetCurrent(me);
+            // player = Turns.CurrentPlayer.Value;            
             
             Turns.EndCurrentTurn();
             
             // 게임 유국 조건이면 무승부를 띄우고 게임 초기화, 세트는 0번으로
-            bool isDrawGame = IsDrawGame();
-            if (isDrawGame)
+            if (IsDrawGame())
             {
                 EndGame();
             }

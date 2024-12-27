@@ -152,15 +152,15 @@ namespace Mahjong
             return false;
         }
 
-        public bool CanKang(Player p)
-        {
-            return false;
-        }
-
         public bool CanRon(Player other)
         {
             return false;
         }
+        
+        public bool CanKang(Player p)
+        {
+            return false;
+        }        
         
         public bool CanPong(Player other)
         {

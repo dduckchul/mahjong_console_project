@@ -41,8 +41,10 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="CircularLinkedListHelper.cs" />
+        <Compile Include="Cpu.cs" />
         <Compile Include="Deck.cs" />
         <Compile Include="Game.cs" />
+        <Compile Include="Human.cs" />
         <Compile Include="IAction.cs" />
         <Compile Include="IPlayable.cs" />
         <Compile Include="Player.cs" />
