@@ -5,7 +5,6 @@ namespace Mahjong
 {
     public class Deck
     {
-        public const int DistributedTiles = 52;
         public const int PublicTiles = 70;
         public const int MaxDoraTiles = 5;
         public const int MaxYungsangTiles = 4;
@@ -169,18 +168,25 @@ namespace Mahjong
 
         public class Hands
         {
-            private Tiles.Tile[] _myTiles;
-            private Tiles.Tile[] _discards;
+            private List<Tiles.Tile> _myTiles;
+            private List<Tiles.Tile> _discards;
             private Tiles.Tile _temp;
             private List<Tiles.Tile[]> _openedBodies;
+
+            public Hands()
+            {
+                MyTiles = new List<Tiles.Tile>();
+                Discards = new List<Tiles.Tile>();
+                OpenedBodies = new List<Tiles.Tile[]>();
+            }
             
-            public Tiles.Tile[] MyTiles
+            public List<Tiles.Tile> MyTiles
             {
                 get { return _myTiles; }
                 set { _myTiles = value; }
             }
 
-            public Tiles.Tile[] Discards
+            public List<Tiles.Tile> Discards
             {
                 get { return _discards; }
                 set { _discards = value; }
@@ -200,12 +206,13 @@ namespace Mahjong
             
             // 1. Sort By Type,
             // 2. Sort By Number
+            // Limit 까지 정렬하는데, 그 이상 하면 스택 오버플로우, 예외처리
             public void SortMyHand()
             {
                 // 단순하게 하면.. Type 으로 정렬, Number 로 정렬 이중포문 두번
-                for (int i = 0; i < MyTiles.Length-1; i++)
+                for (int i = 0; i < MyTiles.Count; i++)
                 {
-                    for (int j = i + 1; j < MyTiles.Length-1; j++)
+                    for (int j = i + 1; j < MyTiles.Count; j++)
                     {
                         int myTilesType = (int)MyTiles[i].Type;
                         int nextTilesType = (int)MyTiles[j].Type;
@@ -219,9 +226,9 @@ namespace Mahjong
                 }
             
                 // myTile 변경될때 인덱스를 기억해뒀다가 다시 정렬
-                for (int i = 0; i < MyTiles.Length-1; i++)
+                for (int i = 0; i < MyTiles.Count; i++)
                 {
-                    for (int j = i + 1; j < MyTiles.Length-1; j++)
+                    for (int j = i + 1; j < MyTiles.Count; j++)
                     {
                         int myTileNumber = MyTiles[i].Number;
                         int nextTileNumber = MyTiles[j].Number;
@@ -242,19 +249,6 @@ namespace Mahjong
                     }
                 }
             }
-            
-            // 비어있는 공간 찾기
-            public int FindLastDiscardInx()
-            {
-                for (int i = 0; i < Discards.Length; i++)
-                {
-                    if (!Discards[i].IsValidTile())
-                    {
-                        return i;
-                    }
-                }
-                return -1;
-            }            
         }
         
         // 마작 타일 생성 후 초기화 (136개)

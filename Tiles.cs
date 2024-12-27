@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Mahjong
 {
@@ -39,14 +40,17 @@ namespace Mahjong
 
             public bool IsShowingFront
             {
-                get;
-                set;
+                get; set;
             }
 
             public bool IsVisible
             {
-                get;
-                set;
+                get; set;
+            }
+            
+            public bool IsRiichi
+            {
+                get; set;
             }
 
             public Tile(TileType type, int number, bool isDora)
@@ -56,6 +60,7 @@ namespace Mahjong
                 _isDora = isDora;
                 IsShowingFront = false;
                 IsVisible = false;
+                IsRiichi = false;
             }
             
             public void PrintTile()
@@ -66,10 +71,16 @@ namespace Mahjong
                     Console.Write("🀫 ");
                     return;
                 }
-                
-                if (IsDora)
+
+                if (IsDora && IsRiichi)
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                } else if (IsDora)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
+                } else if (IsRiichi)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                 }
 
                 if (Type == TileType.Man) { PrintMan(); }
@@ -84,7 +95,7 @@ namespace Mahjong
                     Console.Write(" ");
                 }
                 
-                if (IsDora)
+                if (IsDora || IsRiichi)
                 {
                     Console.ResetColor();                
                 }
@@ -214,6 +225,11 @@ namespace Mahjong
         public static bool IsNumberType(TileType type)
         {
             return (int)type < (int)TileType.Wind;
+        }
+
+        public static void PrintDeck(List<Tile> tlist)
+        {
+            PrintDeck(tlist.ToArray());
         }
         
         // To-Do 마지막 버린 타일을 색 변경해서 보여주고싶다

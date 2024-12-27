@@ -11,7 +11,6 @@ namespace Mahjong
         // 같이 마작 할사람 ㅠㅠ 4명이 있어야만 진행됨....
         public const int MaxPlayers = 4;
         public const int MaxHandTiles = 14;
-        public const int MaxDiscardTiles = 30;
         
         // 플레이어 정보
         private int _score;
@@ -22,6 +21,7 @@ namespace Mahjong
         private bool _isCrying;
         private Game.Winds _wind;
         private Deck.Hands _hands;
+        private Yaku _yaku;
 
         public Player(string name, Game.Winds wind)
         {
@@ -29,6 +29,7 @@ namespace Mahjong
             Score = DefaultScore;
             Wind = wind;
             Hands = new Deck.Hands();
+            PlayerYaku = new Yaku();
         }
         public String Name
         {
@@ -38,7 +39,7 @@ namespace Mahjong
         public int Score
         {
             get { return _score; }
-            private set { _score = value; }
+            protected set { _score = value; }
         }
         
         public Game.Winds Wind
@@ -56,19 +57,25 @@ namespace Mahjong
         public bool IsRiichi
         {
             get { return _isRiichi; }
-            private set { _isRiichi = value; }
+            protected set { _isRiichi = value; }
         }
 
         public bool IsCrying
         {
             get { return _isCrying; }
-            private set { _isCrying = value; }
+            protected set { _isCrying = value; }
         }
 
         public Deck.Hands Hands
         {
             get { return _hands; }
             private set { _hands = value; }
+        }
+
+        protected Yaku PlayerYaku
+        {
+            get { return _yaku; }
+            set { _yaku = value; }
         }
 
         // 나는 초기화 했다고 가정, cpu 플레이어 생성해주기
@@ -88,6 +95,14 @@ namespace Mahjong
             }
             return players;
         }
+
+        public void InitPlayerFlags()
+        {
+            IsPlaying = false;
+            IsRiichi = false;
+            IsCrying = false;
+            Hands.Temp = new Tiles.Tile();
+        }
         
         // 플레이어가 number 개 만큼 타일 가져가기
         // 따로 넘버로 나눈 이유는 뿌려주는거 애니메이션처럼 할려고 ㅎㅎㅎㅎㅎㅎㅎ..
@@ -98,21 +113,12 @@ namespace Mahjong
             {
                 // 타일 잠시 저장해두는 변수
                 Tiles.Tile tile = publicStack.Pop();
-                for (int j = 0; j < Hands.MyTiles.Length; j++)
+                tile.IsVisible = true;
+                if (this is Human)
                 {
-                    tile.IsVisible = true;
-                    if (this is Human)
-                    {
-                        tile.IsShowingFront = true;
-                    }
-                    
-                    // 비어있는거 확인하려고 숫자 비교했는데 여기서 이상해짐
-                    if (Hands.MyTiles[j].IsValidTile() == false)
-                    {
-                        Hands.MyTiles[j] = tile;
-                        break;
-                    }
-                }            
+                    tile.IsShowingFront = true;
+                }
+                Hands.MyTiles.Add(tile);
             }
         }
 
@@ -198,17 +204,17 @@ namespace Mahjong
         // 선택한 타일 Discard 핸드에 넣고 버리기
         // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
         // 버림패는 무조건 공개
-        public void DiscardMyHand(int keyInt)
+        public void DiscardMyHand(int keyInt, bool isRiichi)
         {
             Tiles.Tile discard = Hands.MyTiles[keyInt];
             discard.IsShowingFront = true;
-            Hands.MyTiles[keyInt] = Hands.Temp;
-            Hands.MyTiles[MaxHandTiles - 1] = new Tiles.Tile();
-
-            int lastDiscard = Hands.FindLastDiscardInx();
-            Hands.Discards[lastDiscard] = discard;
+            if (isRiichi)
+            {
+                discard.IsRiichi = true;                
+            }
+            Hands.MyTiles.RemoveAt(keyInt);
+            Hands.Discards.Add(discard);
             Hands.Temp = new Tiles.Tile();
-            Hands.SortMyHand();
         }
 
         // C# equals 재정의
@@ -253,12 +259,30 @@ namespace Mahjong
         // 핸드에 temp 더하기
         public void PrintTurn()
         {
-            Program.WaitUntilElapsedTime(500);
+            Program.WaitUntilElapsedTime(300);
             Console.Write($"{Name}님의 순서! ");
             Console.Write("1️⃣  버리기 ");
-            Console.Write("2️⃣  리치 ");
-            Console.Write("3️⃣  쯔모 ");
-            Console.Write("4️⃣  깡 ");
+            
+            if (PlayerYaku.CanRiichi(this))
+            {
+                Console.Write("2️⃣  리치 ");
+            }
+            
+            if (PlayerYaku.CanTsumo(this))
+            {
+                Console.Write("3️⃣  쯔모 ");
+            }
+
+            if (PlayerYaku.CanRon(this))
+            {
+                Console.Write("4️⃣  론 ");
+            }
+
+            if (PlayerYaku.CanKang(this))
+            {
+                Console.Write("5️⃣  깡 ");
+            }
+
             Console.Write("0️⃣  종료");
             Console.WriteLine("");            
         }
@@ -268,15 +292,16 @@ namespace Mahjong
             tile.IsShowingFront = true;
             Hands.Temp = tile;
         }
-
+        
         public void AddHand()
         {
-            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;
+            Hands.MyTiles.Add(Hands.Temp);
         }
-
-        public void DiscardTile(int tileNum)
+        
+        public void DiscardTile(int tileNum, bool isRiichi)
         {
-            DiscardMyHand(tileNum);
+            DiscardMyHand(tileNum, isRiichi);
+            Hands.SortMyHand();
         }
 
         public ConsoleKey ReadActionKey()
@@ -290,13 +315,16 @@ namespace Mahjong
                 if (keyInfo.Key == ConsoleKey.D1)
                 {
                     isFalseKey = false;
-                } else if (keyInfo.Key == ConsoleKey.D2)
+                } else if (keyInfo.Key == ConsoleKey.D2 && PlayerYaku.CanRiichi(this))
                 {
-                    Console.WriteLine("🚜👷리치 구현중....⛏️");
-                } else if (keyInfo.Key == ConsoleKey.D3)
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D3 && PlayerYaku.CanTsumo(this))
                 {
-                    Console.WriteLine("🚜👷쯔모 구현중....⛏️");
-                } else if (keyInfo.Key == ConsoleKey.D4)
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D4 && PlayerYaku.CanRon(this))
+                {
+                    Console.WriteLine("🚜👷론 구현중....⛏️");                    
+                } else if (keyInfo.Key == ConsoleKey.D5 && PlayerYaku.CanKang(this))
                 {
                     Console.WriteLine("🚜👷깡 구현중....⛏️");
                 } else if (keyInfo.Key == ConsoleKey.D0)
@@ -321,7 +349,7 @@ namespace Mahjong
 
         public void PrintDiscard()
         {
-            Console.Clear();
+            Program.PrintClear();
             Console.WriteLine("버릴 타일을 선택 해 주세요\n");
             Tiles.PrintDeck(Hands.MyTiles);
             Console.Write("\n0 1 2 3 4 5 6 7 8 9 A B C D\n");            
@@ -333,14 +361,14 @@ namespace Mahjong
             bool parseResult = false;
             int keyInt = 0;
             
-            // 스트링 -> 16진수 변환하기
+            // 스트링 -> 16진수 변환하기, 0~13 까지 체크하고 넘으면 다시 입력할수 있도록
             // https://stackoverflow.com/questions/98559/how-to-parse-hex-values-into-a-uint            
-            while (!parseResult)
+            while (!parseResult || keyInt > MaxHandTiles -1) 
             {
                 keyInfo = Console.ReadKey();
                 parseResult = int.TryParse(keyInfo.KeyChar.ToString(), 
                     NumberStyles.HexNumber, CultureInfo.CurrentCulture, out keyInt);
-                if (parseResult)
+                if (parseResult && keyInt < MaxHandTiles)
                 {
                     Program.WaitUntilElapsedTime(100);
                     Console.WriteLine(" 선택한 숫자 : " + keyInt);
@@ -354,21 +382,77 @@ namespace Mahjong
             return keyInt;
         }
 
-        public void Action()
+        // 핸드에 임시 타일 추가, 역 계산, 행동 표시, 입력키에 따른 행동
+        public void Action(Game game)
         {
             AddHand();
+            PlayerYaku.InitYaku(Hands);
             PrintTurn();
             switch (ReadActionKey())
             {
                 case ConsoleKey.D0 : break;
                 case ConsoleKey.D1 :
                 {
-                    PrintDiscard();
-                    int ind = ReadDiscardKey();
-                    DiscardTile(ind);
+                    UserDiscardAction();
                     break;
                 }
+                case ConsoleKey.D2:
+                {
+                    Riichi();
+                    break;
+                }
+                case ConsoleKey.D3:
+                {
+                    Tsumo(game);
+                    break;
+                }                
             }
+        }
+
+        public void UserDiscardAction()
+        {
+            PrintDiscard();
+            DiscardTile(ReadDiscardKey(), false);
+        }
+
+        public void Riichi()
+        {
+            // 그럴일 없겠지만 만약 리치 할 수 없다면 바로 리턴. 
+            if (!PlayerYaku.CanRiichi(this))
+            {
+                return;
+            }
+            Score -= 1000;
+            IsRiichi = true;
+            PrintDiscard();
+            DiscardTile(ReadDiscardKey(), true);            
+        }
+        
+        public void Tsumo(Game game)
+        {
+            Program.PrintClear();
+            // 이상하게 쯔모한다면 바로 리턴
+            if (!PlayerYaku.CanTsumo(this))
+            {
+                return;
+            }
+            Program.PrintTsumo();
+            game.PrintGames();
+            Console.WriteLine("계속하려면 아무키나 눌러주세요");
+            Console.ReadKey();
+            game.EndSet();
+        }
+
+        public void Ron(Game game)
+        {
+            // 이상하게 론 한다면 바로 리턴
+            if (!PlayerYaku.CanRon(this))
+            {
+                return;
+            }
+            Program.WaitUntilElapsedTime(1000);
+            Console.WriteLine("론냐!!!");
+            game.EndSet();
         }
     }
 
@@ -399,21 +483,38 @@ namespace Mahjong
 
         public void AddHand()
         {
-            Hands.MyTiles[MaxHandTiles - 1] = Hands.Temp;
+            Hands.MyTiles.Add(Hands.Temp);
         }
 
         // 컴퓨터가 하는 행동
         // To-Do : 더 업그레이드 하면 좋겠지만 그냥 랜덤으로 뽑아서 버리자
-        public void DiscardTile(int tileNum)
+        public void DiscardTile(int tileNum, bool isRiichi)
         {
-            DiscardMyHand(tileNum);
-        }
+            DiscardMyHand(tileNum, isRiichi);
+            Hands.SortMyHand();
+        }        
         
-        public void Action()
+        public void Action(Game game)
         {
             AddHand();
+            PlayerYaku.InitYaku(Hands);
             PrintTurn();
-            DiscardTile(Program.Random.Next(0, MaxHandTiles));
+            DiscardTile(Program.Random.Next(0, MaxHandTiles), false);
+        }
+
+        public void Riichi()
+        {
+
+        }
+
+        public void Tsumo(Game game)
+        {
+            
+        }
+
+        public void Ron(Game game)
+        {
+            
         }
     }
 }
