@@ -111,6 +111,10 @@ namespace Mahjong
 
         public void EndGame()
         {
+            foreach (Player pl in Players)
+            {
+                pl.InitPlayerFlags();
+            }
             Set = 0;
             IsGameContinue = false;
             IsSetContinue = false;
@@ -308,7 +312,7 @@ namespace Mahjong
         // 게임의 전체 화면 보여주는 메서드
         public void PrintGames()
         {
-            Console.Clear();
+            Program.PrintClear();
             if (Set != 0)
             {
                 PrintGameInfo();                

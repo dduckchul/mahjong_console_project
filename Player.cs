@@ -349,7 +349,7 @@ namespace Mahjong
 
         public void PrintDiscard()
         {
-            Console.Clear();
+            Program.PrintClear();
             Console.WriteLine("버릴 타일을 선택 해 주세요\n");
             Tiles.PrintDeck(Hands.MyTiles);
             Console.Write("\n0 1 2 3 4 5 6 7 8 9 A B C D\n");            
@@ -430,16 +430,16 @@ namespace Mahjong
         
         public void Tsumo(Game game)
         {
-            Console.Clear();
+            Program.PrintClear();
             // 이상하게 쯔모한다면 바로 리턴
             if (!PlayerYaku.CanTsumo(this))
             {
                 return;
             }
-            Console.WriteLine("쯔모냥!!!");
-            Program.WaitUntilElapsedTime(500);
+            Program.PrintTsumo();
             game.PrintGames();
-            Program.WaitUntilElapsedTime(1000);
+            Console.WriteLine("계속하려면 아무키나 눌러주세요");
+            Console.ReadKey();
             game.EndSet();
         }
 
