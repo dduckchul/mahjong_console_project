@@ -31,7 +31,7 @@ namespace Mahjong
         // 비교하기 위해 임시 핸드를 만든다.
         private void MakeTempHands(Deck.Hands hands)
         {
-            TempHands =  new Deck.Hands();
+            TempHands = new Deck.Hands();
             TempHands.MyTiles = new List<Tiles.Tile>(hands.MyTiles);
             TempHands.OpenedBodies = new List<Tiles.Tile[]>();
             TempHands.SortMyHand();
@@ -152,8 +152,41 @@ namespace Mahjong
             return false;
         }
 
-        public bool CanRon(Player other)
+        // 내가(플레이어?) 방금 상대방이 버린 타일로 론 할수 있는지 확인
+        public bool CanRon(Player me, Player target)
         {
+            if (!IsTenpai(me))
+            {
+                return false;
+            }
+
+            List<Tiles.Tile> tempStore = TempHands.MyTiles;
+            TempHands.MyTiles = new List<Tiles.Tile>(tempStore);
+            
+            Tiles.Tile last = target.Hands.Discards[target.Hands.Discards.Count-1];
+            List<Tiles.Tile[]> ronBodies = new List<Tiles.Tile[]>();
+            TempHands.MyTiles.Add(last);
+            TempHands.SortMyHand();
+            
+            DivideTriple(TempHands.MyTiles, 0, ronBodies);
+            DivideStraight(TempHands.MyTiles, 0, 1, ronBodies);
+
+            bool hasHead = IsDeckHasHead(TempHands.MyTiles);
+            int bodies = CountBodies(me.Hands, TempHands) + ronBodies.Count;
+            
+            // 임시 계산 후에 다시 원래대로~ 임시 리스트들도 다 클리어 해준다
+            // 론 할 수 있는 경우
+            if (hasHead && bodies == 4)
+            {
+                ronBodies.Clear();
+                TempHands.MyTiles.Clear();
+                TempHands.MyTiles = tempStore;
+                return true;
+            }
+            
+            ronBodies.Clear();
+            TempHands.MyTiles.Clear();            
+            TempHands.MyTiles = tempStore;
             return false;
         }
         

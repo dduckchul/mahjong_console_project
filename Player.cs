@@ -71,10 +71,10 @@ namespace Mahjong
             private set { _hands = value; }
         }
 
-        protected Yaku PlayerYaku
+        public Yaku PlayerYaku
         {
             get { return _yaku; }
-            set { _yaku = value; }
+            protected set { _yaku = value; }
         }
 
         // 나는 초기화 했다고 가정, cpu 플레이어 생성해주기
@@ -202,8 +202,7 @@ namespace Mahjong
         }
         
         // 선택한 타일 Discard 핸드에 넣고 버리기
-        // 정렬을 맨뒤가 하나 비어있는걸로 가정했기 때문에, 강제로 빈걸로 맨 뒤로 넣어준다.
-        // 버림패는 무조건 공개
+        // 버림패는 무조건 공개, 임시 계산용 역에서도 뺴기
         public void DiscardMyHand(int keyInt, bool isRiichi)
         {
             Tiles.Tile discard = Hands.MyTiles[keyInt];
@@ -214,6 +213,7 @@ namespace Mahjong
             }
             Hands.MyTiles.RemoveAt(keyInt);
             Hands.Discards.Add(discard);
+            PlayerYaku.TempHands.MyTiles.Remove(discard);
             Hands.Temp = new Tiles.Tile();
         }
 

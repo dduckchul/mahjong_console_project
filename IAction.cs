@@ -7,11 +7,11 @@ namespace Mahjong
         void AddHand();        
         void DiscardTile(int tileNum, bool isRiichi);
         void Action(Game game);
+        void Action(Game game, Player other);
 
         // 아래는 마작 역을 판단하는 액션
         void Riichi();
         void Tsumo(Game game);
-        void Ron(Game game);
-
+        void Ron(Game game, Player other);
     }
 }

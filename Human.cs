@@ -38,18 +38,23 @@ namespace Mahjong
                 Console.Write("3️⃣  쯔모 ");
             }
 
-            if (PlayerYaku.CanRon(this))
-            {
-                Console.Write("4️⃣  론 ");
-            }
-
             if (PlayerYaku.CanKang(this))
             {
-                Console.Write("5️⃣  깡 ");
+                Console.Write("4️⃣  깡 ");
             }
 
             Console.Write("0️⃣  종료");
             Console.WriteLine("");            
+        }
+
+        public void PrintTurn(Player other)
+        {
+            Console.WriteLine("");
+            if (PlayerYaku.CanRon(this, other))
+            {
+                Console.Write("1️⃣  론 ");
+                Console.Write("0️⃣  스킵 ");
+            }
         }
 
         public void AddTemp(Tiles.Tile tile)
@@ -86,10 +91,7 @@ namespace Mahjong
                 } else if (keyInfo.Key == ConsoleKey.D3 && PlayerYaku.CanTsumo(this))
                 {
                     isFalseKey = false;
-                } else if (keyInfo.Key == ConsoleKey.D4 && PlayerYaku.CanRon(this))
-                {
-                    Console.WriteLine("🚜👷론 구현중....⛏️");                    
-                } else if (keyInfo.Key == ConsoleKey.D5 && PlayerYaku.CanKang(this))
+                } else if (keyInfo.Key == ConsoleKey.D4 && PlayerYaku.CanKang(this))
                 {
                     Console.WriteLine("🚜👷깡 구현중....⛏️");
                 } else if (keyInfo.Key == ConsoleKey.D0)
@@ -111,6 +113,36 @@ namespace Mahjong
 
             return keyInfo.Key;
         }
+        
+        public ConsoleKey ReadActionKey(Player other)
+        {
+            // 기능 구현중 or 잘못된 키 판별 하는 변수
+            bool isFalseKey = true;
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            while (isFalseKey)
+            {
+                if (keyInfo.Key == ConsoleKey.D1 && PlayerYaku.CanRon(this, other))
+                {
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D0)
+                {
+                    isFalseKey = false;
+                    Console.WriteLine("스킵 합니다");
+                }
+                else
+                {
+                    Console.WriteLine("잘못된 키입니다.");
+                }
+                // 틀린 키일 때 한번 더
+                if (isFalseKey)
+                {
+                    keyInfo = Console.ReadKey(true);
+                }
+            }
+            return keyInfo.Key;
+        }
+
+
 
         public void PrintDiscard()
         {
@@ -174,6 +206,20 @@ namespace Mahjong
             }
         }
 
+        public void Action(Game game, Player other)
+        {
+            PrintTurn(other);
+            switch (ReadActionKey(other))
+            {
+                case ConsoleKey.D0 : break;
+                case ConsoleKey.D1 :
+                {
+                    Ron(game, other);
+                    break;
+                }                
+            }
+        }
+
         public void UserDiscardAction()
         {
             PrintDiscard();
@@ -182,11 +228,6 @@ namespace Mahjong
 
         public void Riichi()
         {
-            // 그럴일 없겠지만 만약 리치 할 수 없다면 바로 리턴. 
-            if (!PlayerYaku.CanRiichi(this))
-            {
-                return;
-            }
             Score -= 1000;
             IsRiichi = true;
             PrintDiscard();
@@ -195,12 +236,6 @@ namespace Mahjong
         
         public void Tsumo(Game game)
         {
-            Program.PrintClear();
-            // 이상하게 쯔모한다면 바로 리턴
-            if (!PlayerYaku.CanTsumo(this))
-            {
-                return;
-            }
             Program.PrintTsumo();
             game.PrintGames();
             Console.WriteLine("계속하려면 아무키나 눌러주세요");
@@ -208,15 +243,12 @@ namespace Mahjong
             game.EndSet();
         }
 
-        public void Ron(Game game)
+        public void Ron(Game game, Player other)
         {
-            // 이상하게 론 한다면 바로 리턴
-            if (!PlayerYaku.CanRon(this))
-            {
-                return;
-            }
-            Program.WaitUntilElapsedTime(1000);
-            Console.WriteLine("론냐!!!");
+            Program.PrintRon();
+            game.PrintGames();
+            Console.WriteLine("계속하려면 아무키나 눌러주세요");
+            Console.ReadKey();            
             game.EndSet();
         }
     }

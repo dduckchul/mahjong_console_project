@@ -46,8 +46,22 @@ namespace Mahjong
             PlayerYaku.InitYaku(Hands);
             PrintTurn();
             DiscardTile(Program.Random.Next(0, MaxHandTiles), false);
+
+            // 내 덱이 론 할수 있을지 확인
+            Player me = game.Me;
+            if (me.PlayerYaku.CanRon(me, this))
+            {
+                (me as IAction)?.Action(game,this);
+            }
         }
 
+        // To-Do 아래는 컴퓨터가 자아를 가질 때 하는 행동들
+        public void Action(Game game, Player other)
+        {
+            
+        }
+
+        // To-Do 컴퓨터 리치, 쯔모, 론 가능하도록..? 언제하니~~
         public void Riichi()
         {
 
@@ -58,7 +72,7 @@ namespace Mahjong
             
         }
 
-        public void Ron(Game game)
+        public void Ron(Game game, Player other)
         {
             
         }

@@ -446,7 +446,7 @@ namespace Mahjong
                 new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 4, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 5, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 8, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 8, false),

@@ -1,7 +1,36 @@
+using System.Collections.Generic;
+
 namespace Mahjong
 {
     public class Score
     {
+        public static class ScoreExtensions
+        {
+            public static List<ScoreOne> FindScoreOne()
+            {
+                List<ScoreOne> scoreList = new List<ScoreOne>();
+                return scoreList;
+            }
+
+            public static List<ScoreTwo> FindScoreTwo()
+            {
+                List<ScoreTwo> scoreList = new List<ScoreTwo>();
+                return scoreList;
+            }
+
+            public static List<ScoreThree> FindScoreThree()
+            {
+                List<ScoreThree> scoreList = new List<ScoreThree>();
+                return scoreList;
+            }
+
+            public static List<ScoreSix> FindScoreSix()
+            {
+                List<ScoreSix> scoreList = new List<ScoreSix>();
+                return scoreList;
+            }
+        }
+        
         public enum ScoreOne
         {
             // 리치 (멘젠), 탕야오, 멘젠쯔모 (멘젠), 
@@ -11,7 +40,7 @@ namespace Mahjong
             // 이페코(멘젠, 123 123 한쌍), 영상개화, 해저로월
             IPPECO, LASTTSUMO, LASTLON,
             // 일발, 도라, 적도라, 역은 아님
-            ILBAL, DORA, AKADORA,
+            ILBAL, DORA, AKADORA
             // 만들기 까다로운 애들 핑후(멘젠), 창깡, 
             // PINGHU, CHANGKKANG
         }
@@ -43,5 +72,9 @@ namespace Mahjong
         }
         
         // 나머지는~~~~~ 시간되면 하자자ㅏ자자자자
+        public static int AddScore(Player p)
+        {
+            return 0;
+        }
     }
 }
