@@ -238,7 +238,8 @@ namespace Mahjong
             // 퍼블릭 덱 검증 출력, 디버그 모드 true 이면 출력
             DebugGame(isDebug, pilesOfTile);
             // 테스트용 게임 조작하기
-            MakeJooJakHand(isJoojak, this);
+            MakeJooJakHand(isJoojak);
+            MakeJooJakDora(isJoojak);
             
             // 각 플레이어 손패 정렬 & 플래그 초기화
             foreach (Player pl in Players)
@@ -326,9 +327,14 @@ namespace Mahjong
                 PrintGameInfo();                
             }
             PrintHeadInfo();
-            if (PublicDeck.PublicStack != null)
+
+            if (PublicDeck.DoraTiles[0].IsValidTile())
             {
                 PrintDoraTiles();
+            }
+            
+            if (PublicDeck.PublicStack != null)
+            {
                 PrintLeftTiles();
             }
             Console.WriteLine();
@@ -365,19 +371,34 @@ namespace Mahjong
         }
         
         // 게임 위 정보 화면
-        private void PrintHeadInfo()
+        public void PrintHeadInfo()
         {
             Console.Write("👦\t");
             Console.Write("💨\t");
             Console.Write("💯\t");
             Console.Write("🙋\t");
-            Console.Write("💭");
+            Console.Write("💭\t");
         }
 
-        private void PrintDoraTiles()
+        public void PrintDoraTiles()
         {
-            Console.Write("  도라 : ");
+            Console.Write("도라 : ");
             Tiles.PrintDeck(PublicDeck.DoraTiles);
+        }
+        
+        // 뒷 도라는 리치시에만 공개 
+        public void PrintUraDoraTiles()
+        {
+            Console.Write("뒷 도라 : ");
+            for(int i = 0; i < PublicDeck.UraDoraTiles.Length; i++)
+            {
+                PublicDeck.UraDoraTiles[i].IsVisible = true;
+                if (i < PublicDeck.CurrentDoraIndex)
+                {
+                    PublicDeck.UraDoraTiles[i].IsShowingFront = true;
+                }
+            }
+            Tiles.PrintDeck(PublicDeck.UraDoraTiles);
         }
 
         private void PrintLeftTiles()
@@ -418,12 +439,12 @@ namespace Mahjong
         }
         
         // 테스트용 주작 핸드 만들기
-        private void MakeJooJakHand(bool isJoojak, Game game)
+        private void MakeJooJakHand(bool isJoojak)
         {
             if (!isJoojak) { return; }
             
             Human human = null;
-            foreach (Player p in game.Players)
+            foreach (Player p in Players)
             {
                 if (p is Human)
                 {
@@ -450,9 +471,9 @@ namespace Mahjong
                 new Tiles.Tile(Tiles.TileType.Tong, 5, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 8, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Man, 5, true),
+                new Tiles.Tile(Tiles.TileType.Man, 6, false),
+                new Tiles.Tile(Tiles.TileType.Man, 7, false),
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)
@@ -465,6 +486,41 @@ namespace Mahjong
             }
 
             human.Hands.MyTiles = new List<Tiles.Tile>(joojakTiles);
-        }        
+        }
+        
+        // 테스트용 주작 핸드 만들기
+        private void MakeJooJakDora(bool isJoojak)
+        {
+            Tiles.Tile[] joojakDoras = new Tiles.Tile[]
+            {
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+            };
+            
+            Tiles.Tile[] joojakDoras2 = new Tiles.Tile[]
+            {
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+            };
+            
+            joojakDoras[0].IsShowingFront = true;
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (joojakDoras[i].IsValidTile())
+                {
+                    joojakDoras[i].IsVisible = true;
+                }
+            }
+
+            PublicDeck.DoraTiles = joojakDoras;
+            PublicDeck.UraDoraTiles = joojakDoras2;
+        }
     }
 }

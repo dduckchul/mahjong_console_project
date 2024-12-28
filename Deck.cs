@@ -49,13 +49,13 @@ namespace Mahjong
             public Tiles.Tile[] DoraTiles
             {
                 get { return _doraTiles; }
-                private set { _doraTiles = value; }
+                set { _doraTiles = value; }
             }
             
             public Tiles.Tile[] UraDoraTiles
             {
                 get { return _uraDoraTiles; }
-                private set { _uraDoraTiles = value; }
+                set { _uraDoraTiles = value; }
             }
 
             public Tiles.Tile[] YungSangTiles

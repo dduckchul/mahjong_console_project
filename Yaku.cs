@@ -33,7 +33,7 @@ namespace Mahjong
         {
             TempHands = new Deck.Hands();
             TempHands.MyTiles = new List<Tiles.Tile>(hands.MyTiles);
-            TempHands.OpenedBodies = new List<Tiles.Tile[]>();
+            TempHands.OpenedBodies = new List<Tiles.Tile[]>(hands.OpenedBodies);
             TempHands.SortMyHand();
             
             // 커쯔와 슌쯔를 확인하면서 TempHand에 임시 몸통으로 추가한다.
@@ -83,11 +83,6 @@ namespace Mahjong
             return counter;
         }
         
-        public int CountBodies(Deck.Hands hands, Deck.Hands tempHands)
-        {
-            return hands.OpenedBodies.Count + tempHands.OpenedBodies.Count;
-        }
-        
         public bool CanRiichi(Player p)
         {
             if (p.IsCrying)
@@ -110,7 +105,7 @@ namespace Mahjong
         public bool IsTenpai(Player p)
         {
             bool hasHead = IsDeckHasHead(TempHands.MyTiles);
-            int bodies = CountBodies(p.Hands, TempHands);
+            int bodies = TempHands.OpenedBodies.Count;
 
             // 몸통만 완성인 경우
             if (hasHead == false && bodies == 4)
@@ -141,7 +136,7 @@ namespace Mahjong
         public bool CanTsumo(Player p)
         {
             bool hasHead = IsDeckHasHead(TempHands.MyTiles);
-            int bodies = CountBodies(p.Hands, TempHands);
+            int bodies = TempHands.OpenedBodies.Count;
 
             // 쯔모 할 수 있는 경우
             if (hasHead && bodies == 4)
@@ -163,16 +158,15 @@ namespace Mahjong
             List<Tiles.Tile> tempStore = TempHands.MyTiles;
             TempHands.MyTiles = new List<Tiles.Tile>(tempStore);
             
-            Tiles.Tile last = target.Hands.Discards[target.Hands.Discards.Count-1];
             List<Tiles.Tile[]> ronBodies = new List<Tiles.Tile[]>();
-            TempHands.MyTiles.Add(last);
+            TempHands.MyTiles.Add(target.LastDiscardTile);
             TempHands.SortMyHand();
             
             DivideTriple(TempHands.MyTiles, 0, ronBodies);
             DivideStraight(TempHands.MyTiles, 0, 1, ronBodies);
 
             bool hasHead = IsDeckHasHead(TempHands.MyTiles);
-            int bodies = CountBodies(me.Hands, TempHands) + ronBodies.Count;
+            int bodies = TempHands.OpenedBodies.Count + ronBodies.Count;
             
             // 임시 계산 후에 다시 원래대로~ 임시 리스트들도 다 클리어 해준다
             // 론 할 수 있는 경우

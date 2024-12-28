@@ -231,24 +231,31 @@ namespace Mahjong
             Score -= 1000;
             IsRiichi = true;
             PrintDiscard();
-            DiscardTile(ReadDiscardKey(), true);            
+            DiscardTile(ReadDiscardKey(), true);
         }
         
         public void Tsumo(Game game)
         {
             Program.PrintTsumo();
-            game.PrintGames();
-            Console.WriteLine("계속하려면 아무키나 눌러주세요");
-            Console.ReadKey();
+            
+            Score score = new Score(this, true);
+            score.CalculateScore(game);
+            
             game.EndSet();
         }
 
         public void Ron(Game game, Player other)
         {
             Program.PrintRon();
-            game.PrintGames();
-            Console.WriteLine("계속하려면 아무키나 눌러주세요");
-            Console.ReadKey();            
+
+            // 론 했으면 마지막 타일을 출력 & 계산 위해 내 핸드의 Temp와 Yaku에 담아줌
+            Hands.Temp = other.LastDiscardTile;
+            PlayerYaku.TempHands.MyTiles.Add(other.LastDiscardTile);
+            PlayerYaku.InitYaku(PlayerYaku.TempHands);
+            
+            Score score = new Score(this, false);
+            score.CalculateScore(game);
+            
             game.EndSet();
         }
     }

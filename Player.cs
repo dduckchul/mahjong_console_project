@@ -71,6 +71,11 @@ namespace Mahjong
             private set { _hands = value; }
         }
 
+        public Tiles.Tile LastDiscardTile
+        {
+            get { return Hands.Discards[Hands.Discards.Count - 1]; }
+        }
+
         public Yaku PlayerYaku
         {
             get { return _yaku; }

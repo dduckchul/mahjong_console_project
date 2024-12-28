@@ -11,11 +11,11 @@ namespace Mahjong
         }
         public enum Winds
         {
-            East,South,West,North
+            East,South,West,North,End
         }
         public enum Words
         {
-            Blank,Start,Middle
+            Blank,Start,Middle,End
         }
         public struct Tile : IEquatable<Tile>
         {
