@@ -116,7 +116,7 @@ namespace Mahjong
 
             // 게임 초기화
             Turns.InitCurrentPlayer(this);
-            InitSet(false, true);
+            InitSet(false, false);
         }
 
         public void EndGame()
