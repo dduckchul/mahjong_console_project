@@ -87,7 +87,6 @@ namespace Mahjong
         {
             if (p.IsCrying)
             {
-                Console.Write("😭 울면 안됩니다 😭 ");
                 return false;
             }
 
@@ -191,6 +190,11 @@ namespace Mahjong
         
         public bool CanPong(Player other)
         {
+            if (DictDeck.ContainsKey(other.LastDiscardTile) && DictDeck[other.LastDiscardTile] == 2)
+            {
+                return true;
+            }
+
             return false;
         }
 

@@ -65,6 +65,24 @@ namespace Mahjong
             }
         }
 
+        // 게임의 오야를 찾는다
+        public Player FindInitPlayer(Game game)
+        {
+            Game.Winds wind = game.Wind;
+            int currentGame = game.Num;
+
+            LinkedListNode<Player> pNode = PlayerList.First;
+            
+            int moveTo = (int)(wind + currentGame - 1) % 4;
+
+            for (int i = 0; i < moveTo; i++)
+            {
+                pNode = pNode.NextOrFirst();
+            }
+
+            return pNode.Value;
+        }
+
         public Player FindAndSetCurrent(Player player)
         {
             if (player == null)

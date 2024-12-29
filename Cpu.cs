@@ -45,14 +45,11 @@ namespace Mahjong
             AddHand();
             PlayerYaku.InitYaku(Hands);
             PrintTurn();
-            DiscardTile(Program.Random.Next(0, MaxHandTiles), false);
+            DiscardTile(Program.Random.Next(0, Hands.MyTiles.Count-1), false);
 
-            // 내 덱이 론 할수 있을지 확인
+            // 내 덱이 론, 퐁, 치 할수 있을지 확인
             Player me = game.Me;
-            if (me.PlayerYaku.CanRon(me, this))
-            {
-                (me as IAction)?.Action(game,this);
-            }
+            (me as IAction)?.Action(game,this);
         }
 
         // To-Do 아래는 컴퓨터가 자아를 가질 때 하는 행동들

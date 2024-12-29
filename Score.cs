@@ -74,6 +74,7 @@ namespace Mahjong
             // CHANGKKANG
         }
 
+        // To-Do : 2판 이상의 역들.. 시간이 될까?
         public enum ScoreTwo
         {
             // 더블리치(멘젠), 삼색동각, 산깡쯔(깡만 3개)
@@ -110,24 +111,50 @@ namespace Mahjong
             CHUNGIL
         }
         
-        // 나머지는~~~~~ 시간되면 하자자ㅏ자자자자
+
+        // 쯔모시 스코어 계산
         public void CalculateScore(Game game)
         {
-            FindScoreOne(game);
+            int score = FindScoreOne(game);
 
-            int score = 0;
-            
-            foreach (ScoreOne key in ScoreOneDict.Keys)
+            if (score == 0)
             {
-                score += ScoreOneDict[key];
+                Console.WriteLine("뭔가 잘못되었습니다 😱");
             }
-
-            score = score * DefaultPan;
             
-            PrintScore(game);
+            // 1판당 1000점이라고 치자.
+            score = score * DefaultPan;
+            Player parent = game.Turns.FindInitPlayer(game);
+            if (Winner.Equals(parent))
+            {
+                score = (int)Math.Floor(score * 1.5d);                
+            }
+            
+            PrintScore(game, score);
         }
 
-        private void PrintScore(Game game)
+        // 론 했을때 스코어 계산
+        public void CalculateScore(Game game, Player other)
+        {
+            int score = FindScoreOne(game);
+
+            if (score == 0)
+            {
+                Console.WriteLine("뭔가 잘못되었습니다 😱");
+            }
+            
+            // 1판당 1000점이라고 치자.
+            score = score * DefaultPan;
+            Player parent = game.Turns.FindInitPlayer(game);
+            if (Winner.Equals(parent))
+            {
+                score = (int)Math.Floor(score * 1.5d);                
+            }
+            
+            PrintScore(game, other, score);            
+        }
+
+        private void PrintScore(Game game, int score)
         {
             Program.PrintClear();
             game.PrintDoraTiles();
@@ -154,13 +181,71 @@ namespace Mahjong
                     Console.WriteLine();
                 }
             }
+
+            // 득점
+            Console.WriteLine(Winner.Name + "\t" + "💯+\t" + Winner.Score + "+" + score);
+            Winner.AddScore(score);
+
+            // 감점
+            int minusScore = -(score / (Player.MaxPlayers - 1));
+            foreach (Player p in game.Players)
+            {
+                if (p.Equals(Winner))
+                {
+                    continue;
+                }
+                Console.WriteLine(p.Name + "\t" + "💯+\t" + p.Score + minusScore);
+                p.AddScore(minusScore);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("계속하려면 아무키나 눌러주세요");
+            Console.ReadKey();
+        }
+
+        public void PrintScore(Game game, Player other, int score)
+        {
+            Program.PrintClear();
+            game.PrintDoraTiles();
+            if (Winner.IsRiichi)
+            {
+                Console.WriteLine();
+                game.PrintUraDoraTiles();                
+            }
+            Program.WaitUntilElapsedTime(500);            
             
+            Console.WriteLine("\n");
+            game.PrintHeadInfo();
+            Console.WriteLine();
+            Winner.PrintPlayer();
+            Program.WaitUntilElapsedTime(500);
+
+            Console.WriteLine();
+            if (ScoreOneDict.Count > 0)
+            {
+                foreach (ScoreOne key in ScoreOneDict.Keys)
+                {
+                    Console.Write(key + ":\t\t" + ScoreOneDict[key]);
+                    Program.WaitUntilElapsedTime(1000);
+                    Console.WriteLine();
+                }
+            }
+            Console.WriteLine();
+            
+            // 득점
+            Console.WriteLine(Winner.Name + "\t" + "💯+\t" + Winner.Score + "+" + score);
+            Winner.AddScore(score);
+
+            // 감점
+            Console.WriteLine(other.Name + "\t" + "💯+\t" + other.Score + (-score));
+            other.AddScore(-score);
+
             Console.WriteLine();
             Console.WriteLine("계속하려면 아무키나 눌러주세요");
             Console.ReadKey();            
         }
 
-        private void FindScoreOne(Game game)
+        private int FindScoreOne(Game game)
         {
             FindRiichi();
             FindTanyao();
@@ -171,6 +256,14 @@ namespace Mahjong
             FindLastScore(game);
             FindDora(game);
             FindAkaDora();
+            
+            int score = 0;
+            foreach (ScoreOne key in ScoreOneDict.Keys)
+            {
+                score += ScoreOneDict[key];
+            }
+
+            return score;
         }
 
         public void FindRiichi()

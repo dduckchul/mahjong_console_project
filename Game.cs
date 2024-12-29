@@ -301,13 +301,10 @@ namespace Mahjong
         {
             Player player = Turns.StartCurrentTurn();
             Tiles.Tile tile = PublicDeck.Tsumo();
+
             (player as IAction)?.AddTemp(tile);
             PrintGames();
             (player as IAction)?.Action(this);
-            
-            // 턴 뺏어버리기 예제
-            // Turns.FindAndSetCurrent(me);
-            // player = Turns.CurrentPlayer.Value;            
             
             Turns.EndCurrentTurn();
             
@@ -461,19 +458,33 @@ namespace Mahjong
 
             Tiles.Tile[] joojakTiles =
             {
-                new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 3, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 4, false),
+                // new Tiles.Tile(Tiles.TileType.Tong, 4, false),
+                // new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                // new Tiles.Tile(Tiles.TileType.Tong, 8, false),
+                // new Tiles.Tile(Tiles.TileType.Tong, 8, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 5, true),
+                // new Tiles.Tile(Tiles.TileType.Man, 6, false),
+                // new Tiles.Tile(Tiles.TileType.Man, 7, false),
+                
+                new Tiles.Tile(Tiles.TileType.Man, 1, false),
+                new Tiles.Tile(Tiles.TileType.Man, 1, false),
+                new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 4, false),
+                new Tiles.Tile(Tiles.TileType.Man, 4, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 5, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                new Tiles.Tile(Tiles.TileType.Man, 5, true),
-                new Tiles.Tile(Tiles.TileType.Man, 6, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 6, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 6, false),
+                new Tiles.Tile(Tiles.TileType.Man, 7, true),
                 new Tiles.Tile(Tiles.TileType.Man, 7, false),
+                new Tiles.Tile(Tiles.TileType.Man, 8, false),                
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)
@@ -491,6 +502,7 @@ namespace Mahjong
         // 테스트용 주작 핸드 만들기
         private void MakeJooJakDora(bool isJoojak)
         {
+            if (!isJoojak) { return; }
             Tiles.Tile[] joojakDoras = new Tiles.Tile[]
             {
                 new Tiles.Tile(Tiles.TileType.Tong, 2, false),

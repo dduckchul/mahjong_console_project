@@ -47,14 +47,38 @@ namespace Mahjong
             Console.WriteLine("");            
         }
 
-        public void PrintTurn(Player other)
+        public bool PrintTurn(Player other)
         {
+            bool canAction = false;
             Console.WriteLine("");
             if (PlayerYaku.CanRon(this, other))
             {
                 Console.Write("1️⃣  론 ");
-                Console.Write("0️⃣  스킵 ");
+                canAction = true;
+            } 
+            
+            if (PlayerYaku.CanPong(other))
+            {
+                Console.Write("2️⃣  퐁 ");
+                canAction = true;
             }
+            
+            if (PlayerYaku.CanChi(other))
+            {
+                Console.Write("3️⃣  치 ");
+                canAction = true;                
+            }
+            
+            if (canAction)
+            {
+                Console.Write("0️⃣  스킵 ");
+                Console.WriteLine();
+                Console.Write("상대의 버림패 :\t");
+                other.LastDiscardTile.PrintTile();
+                Console.WriteLine();
+            }
+
+            return canAction;
         }
 
         public void AddTemp(Tiles.Tile tile)
@@ -124,7 +148,14 @@ namespace Mahjong
                 if (keyInfo.Key == ConsoleKey.D1 && PlayerYaku.CanRon(this, other))
                 {
                     isFalseKey = false;
-                } else if (keyInfo.Key == ConsoleKey.D0)
+                } else if (keyInfo.Key == ConsoleKey.D2 && PlayerYaku.CanPong(other))
+                {
+                    isFalseKey = false;
+                } else if (keyInfo.Key == ConsoleKey.D3 && PlayerYaku.CanChi(other))
+                {
+                    Console.WriteLine("🚜👷치 구현중....⛏️");   
+                }
+                else if (keyInfo.Key == ConsoleKey.D0)
                 {
                     isFalseKey = false;
                     Console.WriteLine("스킵 합니다");
@@ -142,8 +173,6 @@ namespace Mahjong
             return keyInfo.Key;
         }
 
-
-
         public void PrintDiscard()
         {
             Program.PrintClear();
@@ -160,7 +189,7 @@ namespace Mahjong
             
             // 스트링 -> 16진수 변환하기, 0~13 까지 체크하고 넘으면 다시 입력할수 있도록
             // https://stackoverflow.com/questions/98559/how-to-parse-hex-values-into-a-uint            
-            while (!parseResult || keyInt > MaxHandTiles -1) 
+            while (!parseResult || keyInt > Hands.MyTiles.Count-1) 
             {
                 keyInfo = Console.ReadKey();
                 parseResult = int.TryParse(keyInfo.KeyChar.ToString(), 
@@ -208,14 +237,22 @@ namespace Mahjong
 
         public void Action(Game game, Player other)
         {
-            PrintTurn(other);
-            switch (ReadActionKey(other))
+            bool canAction = PrintTurn(other);
+            if (canAction)
             {
-                case ConsoleKey.D0 : break;
-                case ConsoleKey.D1 :
+                switch (ReadActionKey(other))
                 {
-                    Ron(game, other);
-                    break;
+                    case ConsoleKey.D0 : break;
+                    case ConsoleKey.D1 :
+                    {
+                        Ron(game, other);
+                        break;
+                    }
+                    case ConsoleKey.D2 :
+                    {
+                        Pong(game, other);
+                        break;
+                    }                    
                 }                
             }
         }
@@ -240,9 +277,18 @@ namespace Mahjong
             
             Score score = new Score(this, true);
             score.CalculateScore(game);
-            
-            game.EndSet();
-        }
+
+            // 부모가 났을 경우, 세트만 종료
+            if (game.Turns.FindInitPlayer(game).Equals(this))
+            {
+                game.EndSet();
+            }
+            // 자식이 났을경우, 다음 게임으로
+            else
+            {
+                game.EndGame();
+            }
+         }
 
         public void Ron(Game game, Player other)
         {
@@ -254,9 +300,59 @@ namespace Mahjong
             PlayerYaku.InitYaku(PlayerYaku.TempHands);
             
             Score score = new Score(this, false);
-            score.CalculateScore(game);
+            score.CalculateScore(game, other);
+
+            // 부모가 났을 경우, 세트만 종료
+            if (game.Turns.FindInitPlayer(game).Equals(this))
+            {
+                game.EndSet();
+            }
+            // 자식이 났을경우, 다음 게임으로
+            else
+            {
+                game.EndGame();
+            }
+        }
+
+        public void Pong(Game game, Player other)
+        {
+            Tiles.Tile otherTile = other.LastDiscardTile;
+            other.Hands.Discards.Remove(otherTile);
+
+            int tempInx = 0;
+            Tiles.Tile[] body = new Tiles.Tile[3];
+
+            // 2개까지 담고 지우기
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < Hands.MyTiles.Count; j++)
+                {
+                    if (otherTile.Equals(Hands.MyTiles[j]))
+                    {
+                        body[tempInx] = Hands.MyTiles[j];
+                        tempInx++;
+                        Hands.MyTiles.RemoveAt(j);
+                    }
+                }                
+            }
+
+            // 공개 패에 선언
+            body[tempInx] = otherTile;
+            Hands.OpenedBodies.Add(body);
             
-            game.EndSet();
+            // 내 손패 버리고 업데이트
+            UserDiscardAction();
+            PlayerYaku.InitYaku(Hands);
+
+            // 울기 표시 & 턴 뺏어버리기
+            IsCrying = true;
+            game.Turns.FindAndSetCurrent(this);
+        }
+
+        public void Chi(Game game, Player other)
+        {
+            // 턴 뺏어버리기 예제
+            // Turns.FindAndSetCurrent(me);
         }
     }
 }

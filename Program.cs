@@ -60,6 +60,17 @@ namespace Mahjong
                     }
                 }
             }
+
+            Player winner = game.Players[0];
+            foreach (Player p in game.Players)
+            {
+                if (winner.Score < p.Score)
+                {
+                    winner = p;
+                }
+            }
+
+            Console.WriteLine("🎉🎉" + winner.Name + "님의 승리! 🥇");
         }
 
         // Thread.sleep 대신 변경, 디버그용으로 멈추는 애니메이션 없에고싶으면 다 주석처리

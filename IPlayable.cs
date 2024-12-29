@@ -8,6 +8,6 @@ namespace Mahjong
         ConsoleKey ReadActionKey(Player other);
         void PrintDiscard();
         int ReadDiscardKey();
-        void PrintTurn(Player other);
+        bool PrintTurn(Player other);
     }
 }

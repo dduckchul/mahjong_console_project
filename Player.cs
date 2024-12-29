@@ -136,6 +136,8 @@ namespace Mahjong
             PrintPlayerTemp();
             Console.WriteLine();
             PrintPlayerDiscards();
+            Console.WriteLine();
+            PrintPlayerBodies();
             Console.WriteLine("\n");
         }
 
@@ -206,6 +208,16 @@ namespace Mahjong
             Tiles.PrintDeck(Hands.Discards);
         }
         
+        private void PrintPlayerBodies()
+        {
+            Console.Write("공개\t:\t");
+            foreach (Tiles.Tile[] body in Hands.OpenedBodies)
+            {
+                Tiles.PrintDeck(body);
+                Console.Write("\t");
+            }
+        }        
+        
         // 선택한 타일 Discard 핸드에 넣고 버리기
         // 버림패는 무조건 공개, 임시 계산용 역에서도 뺴기
         public void DiscardMyHand(int keyInt, bool isRiichi)
@@ -220,6 +232,11 @@ namespace Mahjong
             Hands.Discards.Add(discard);
             PlayerYaku.TempHands.MyTiles.Remove(discard);
             Hands.Temp = new Tiles.Tile();
+        }
+
+        public void AddScore(int score)
+        {
+            Score += score;
         }
 
         // C# equals 재정의
