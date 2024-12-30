@@ -40,7 +40,6 @@ namespace Mahjong
             IsRunning = true;
             
             // 게임 초기화. 동풍전 1국 1번장부터 시작, 동풍전 이상 하고싶으면 Size 늘리기
-            // 게임 생성시 유
             Game game = new Game(4);
             
             // 게임 기억하기
