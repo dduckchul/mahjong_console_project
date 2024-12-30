@@ -116,7 +116,7 @@ namespace Mahjong
 
             // 게임 초기화
             Turns.InitCurrentPlayer(this);
-            InitSet(false, false);
+            InitSet(false, true);
         }
 
         public void EndGame()
@@ -458,33 +458,19 @@ namespace Mahjong
 
             Tiles.Tile[] joojakTiles =
             {
-                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 3, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                // new Tiles.Tile(Tiles.TileType.Tong, 4, false),
-                // new Tiles.Tile(Tiles.TileType.Tong, 5, false),
-                // new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                // new Tiles.Tile(Tiles.TileType.Tong, 8, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 5, true),
-                // new Tiles.Tile(Tiles.TileType.Man, 6, false),
-                // new Tiles.Tile(Tiles.TileType.Man, 7, false),
-                
-                new Tiles.Tile(Tiles.TileType.Man, 1, false),
-                new Tiles.Tile(Tiles.TileType.Man, 1, false),
-                new Tiles.Tile(Tiles.TileType.Man, 3, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 2, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 3, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 4, false),
+                new Tiles.Tile(Tiles.TileType.Man, 2, false),
                 new Tiles.Tile(Tiles.TileType.Man, 3, false),
                 new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 5, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 4, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 5, true),
                 new Tiles.Tile(Tiles.TileType.Tong, 6, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 6, false),
-                new Tiles.Tile(Tiles.TileType.Man, 7, true),
-                new Tiles.Tile(Tiles.TileType.Man, 7, false),
-                new Tiles.Tile(Tiles.TileType.Man, 8, false),                
+                new Tiles.Tile(Tiles.TileType.Word, 1, false),
+                new Tiles.Tile(Tiles.TileType.Word, 1, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)
