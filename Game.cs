@@ -116,7 +116,7 @@ namespace Mahjong
 
             // 게임 초기화
             Turns.InitCurrentPlayer(this);
-            InitSet(false, true);
+            InitSet(false);
         }
 
         public void EndGame()
@@ -222,8 +222,10 @@ namespace Mahjong
         }
 
         // 게임 1국에 필요한 것들 모두 초기화
-        private void InitSet(bool isDebug, bool isJoojak)
+        private void InitSet(bool isDebug)
         {
+            bool isJooJak = false;
+            
             // 마작 덱 셔플 & 공용 덱 초기화
             Tiles.Tile[] pilesOfTile = Deck.MakeInitDeck();
             Deck.ShuffleDeck(pilesOfTile);
@@ -237,9 +239,10 @@ namespace Mahjong
 
             // 퍼블릭 덱 검증 출력, 디버그 모드 true 이면 출력
             DebugGame(isDebug, pilesOfTile);
+
             // 테스트용 게임 조작하기
-            MakeJooJakHand(isJoojak);
-            MakeJooJakDora(isJoojak);
+            MakeJooJakHand(isJooJak);
+            MakeJooJakDora(isJooJak);
             
             // 각 플레이어 손패 정렬 & 플래그 초기화
             foreach (Player pl in Players)
@@ -458,19 +461,21 @@ namespace Mahjong
 
             Tiles.Tile[] joojakTiles =
             {
-                new Tiles.Tile(Tiles.TileType.Sak, 2, false),
+                new Tiles.Tile(Tiles.TileType.Man, 4, false),
+                new Tiles.Tile(Tiles.TileType.Man, 5, false),
+                new Tiles.Tile(Tiles.TileType.Man, 6, false),
+                
                 new Tiles.Tile(Tiles.TileType.Sak, 3, false),
                 new Tiles.Tile(Tiles.TileType.Sak, 4, false),
-                new Tiles.Tile(Tiles.TileType.Man, 2, false),
-                new Tiles.Tile(Tiles.TileType.Man, 3, false),
-                new Tiles.Tile(Tiles.TileType.Man, 4, false),
-                new Tiles.Tile(Tiles.TileType.Tong, 4, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 5, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 9, false),
+                new Tiles.Tile(Tiles.TileType.Sak, 9, false),
+
+                new Tiles.Tile(Tiles.TileType.Tong, 2, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 3, false),
                 new Tiles.Tile(Tiles.TileType.Tong, 5, true),
                 new Tiles.Tile(Tiles.TileType.Tong, 6, false),
-                new Tiles.Tile(Tiles.TileType.Word, 1, false),
-                new Tiles.Tile(Tiles.TileType.Word, 1, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
-                new Tiles.Tile(Tiles.TileType.Wind, 0, false),
+                new Tiles.Tile(Tiles.TileType.Tong, 7, false),
             };
 
             for (int i = 0; i < joojakTiles.Length; i++)

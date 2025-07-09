@@ -276,7 +276,7 @@ namespace Mahjong
         public int FindSequencial(List<Tiles.Tile> deck, int start, int ind)
         {
             // 다음 패가 현재 패에서 +1 한 숫자면 true, 같은 숫자면 한번 더 넘어감
-            for (int i = ind; i < deck.Count-1; i++)
+            for (int i = ind; i < deck.Count; i++)
             {
                 if (deck[start].Equals(deck[i]))
                 {
